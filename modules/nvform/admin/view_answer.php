@@ -7,7 +7,10 @@
  * @License GNU/GPL version 2 or any later version
  * @Createdate 24-06-2011 10:35
  */
-if (!defined('NV_IS_FILE_ADMIN')) die('Stop!!!');
+
+if (!defined('NV_IS_FILE_ADMIN')) {
+    die('Stop!!!');
+}
 
 $id = $nv_Request->get_int('id', 'get', 0);
 

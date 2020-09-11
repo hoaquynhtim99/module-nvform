@@ -7,7 +7,10 @@
  * @License GNU/GPL version 2 or any later version
  * @Createdate Dec 3, 2010 11:33:22 AM
  */
-if (!defined('NV_IS_FILE_ADMIN')) die('Stop!!!');
+
+if (!defined('NV_IS_FILE_ADMIN')) {
+    die('Stop!!!');
+}
 
 if (!class_exists('PHPExcel')) {
     if (file_exists(NV_ROOTDIR . '/includes/class/PHPExcel.php')) {
@@ -28,7 +31,8 @@ if ($nv_Request->isset_request('export', 'post, get')) {
     $type = $nv_Request->get_title('type', 'get, post', '');
     $is_zip = $nv_Request->get_int('is_zip', 'get, post', 0);
 
-    if (empty($type)) die('NO');
+    if (empty($type))
+        die('NO');
 
     $question_data = array();
     $result = $db->query('SELECT * FROM ' . NV_PREFIXLANG . '_' . $module_data . '_question WHERE fid = ' . $fid);
@@ -267,7 +271,8 @@ if ($nv_Request->isset_request('export', 'post, get')) {
     $file_src = NV_ROOTDIR . '/' . NV_TEMP_DIR . '/' . $form_info['alias'] . '.' . $array['objExt'];
     $objWriter->save($file_src);
 
-    if (!$download and file_exists($file_src)) die('OK_' . str_replace(NV_ROOTDIR . NV_BASE_SITEURL, '', $file_src));
+    if (!$download and file_exists($file_src))
+        die('OK_' . str_replace(NV_ROOTDIR . NV_BASE_SITEURL, '', $file_src));
 
     if (!$is_zip) {
         $download = new NukeViet\Files\Download($file_src, NV_ROOTDIR . '/' . NV_TEMP_DIR);

@@ -7,15 +7,18 @@
  * @License GNU/GPL version 2 or any later version
  * @Createdate Tue, 08 Apr 2014 15:13:43 GMT
  */
-if (!defined('NV_MAINFILE')) die('Stop!!!');
+
+if (!defined('NV_MAINFILE')) {
+    die('Stop!!!');
+}
 
 function nv_form_result($question_data, $answer_data, $is_admin = 0)
 {
     global $lang_module, $global_config, $module_info, $module_name, $module_data, $module_file, $user_info;
 
-    if($is_admin){
+    if ($is_admin) {
         $template = $global_config['module_theme'];
-    }else{
+    } else {
         $template = $module_info['template'];
     }
     $xtpl = new XTemplate('view_answer.tpl', NV_ROOTDIR . '/themes/' . $template . '/modules/' . $module_file);
@@ -33,7 +36,8 @@ function nv_form_result($question_data, $answer_data, $is_admin = 0)
                 $ans = $answer[$qid];
                 $question_type = $data['question_type'];
 
-                if ($question_type == 'plaintext') continue;
+                if ($question_type == 'plaintext')
+                    continue;
 
                 if ($question_type == 'multiselect' or $question_type == 'select' or $question_type == 'radio' or $question_type == 'checkbox') {
                     $data = unserialize($data['question_choices']);

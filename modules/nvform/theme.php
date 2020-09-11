@@ -7,7 +7,10 @@
  * @License GNU/GPL version 2 or any later version
  * @Createdate Tue, 08 Apr 2014 15:13:43 GMT
  */
-if (!defined('NV_IS_MOD_NVFORM')) die('Stop!!!');
+
+if (!defined('NV_IS_MOD_NVFORM')) {
+    die('Stop!!!');
+}
 
 /**
  * nv_theme_nvform_main()
@@ -67,9 +70,9 @@ function nv_theme_nvform_viewform($form_info, $question_info, $answer_info, $ans
 
     $my_footer .= "<script type=\"text/javascript\">\n";
     $my_footer .= "$(document).ready(function(){
-					$('#question').validate({
-					});
-				 });";
+                    $('#question').validate({
+                    });
+                 });";
     $my_footer .= " </script>\n";
 
     if (!empty($form_info['end_time'])) {

@@ -7,7 +7,10 @@
  * @License GNU/GPL version 2 or any later version
  * @Createdate 12/5/2012 11:29
  */
-if (!defined('NV_MAINFILE')) die('Stop!!!');
+
+if (!defined('NV_MAINFILE')) {
+    die('Stop!!!');
+}
 
 $i = 1;
 $page = 1;
@@ -67,8 +70,8 @@ foreach ($question_info as $row) {
 
                     $return = '<textarea style="width: ' . $width . '; height:' . $height . ';" id="' . $module_data . '_' . $textareaname . '" name="' . $textareaname . '">' . $val . '</textarea>';
                     $return .= "<script type=\"text/javascript\">
-					CKEDITOR.replace( '" . $module_data . "_" . $textareaname . "', {" . (!empty($customtoolbar) ? 'toolbar : "' . $customtoolbar . '",' : '') . " width: '" . $width . "',height: '" . $height . "',});
-					</script>";
+                    CKEDITOR.replace( '" . $module_data . "_" . $textareaname . "', {" . (!empty($customtoolbar) ? 'toolbar : "' . $customtoolbar . '",' : '') . " width: '" . $width . "',height: '" . $height . "',});
+                    </script>";
                     return $return;
                 }
             }

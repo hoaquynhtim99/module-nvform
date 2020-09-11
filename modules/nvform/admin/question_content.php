@@ -7,7 +7,10 @@
  * @License GNU/GPL version 2 or any later version
  * @Createdate Tue, 08 Apr 2014 15:13:43 GMT
  */
-if (!defined('NV_IS_FILE_ADMIN')) die('Stop!!!');
+
+if (!defined('NV_IS_FILE_ADMIN')) {
+    die('Stop!!!');
+}
 
 $ini = nv_parse_ini_file(NV_ROOTDIR . '/includes/ini/mime.ini', true);
 $myini = array(
@@ -31,9 +34,10 @@ foreach ($ini as $type => $extmime) {
         $myini['mimes'] = array_merge($myini['mimes'], $m);
     } else {
         foreach ($m as $m2) {
-            if (!is_array($m2)) $m2 = array(
-                $m2
-            );
+            if (!is_array($m2))
+                $m2 = array(
+                    $m2
+                );
             $myini['mimes'] = array_merge($myini['mimes'], $m2);
         }
     }
@@ -305,10 +309,10 @@ if ($nv_Request->isset_request('submit', 'post')) {
             $weight = intval($weight) + 1;
 
             $sql = "INSERT INTO " . NV_PREFIXLANG . "_" . $module_data . "_question
-				(title, fid, weight, question_type, question_choices, question_choices_extend, match_type, match_regex, func_callback, min_length, max_length, required, user_editable, default_value, break, report, class, status) VALUES
-				('" . $question['title'] . "', " . $question['question_form'] . ", " . $weight . ", '" . $question['question_type'] . "', '" . $question['question_choices'] . "', '" . $question['question_choices_extend'] . "', '" . $question['match_type'] . "',
-				'" . $question['match_regex'] . "', '" . $question['func_callback'] . "', " . $question['min_length'] . ", " . $question['max_length'] . ",
-				" . $question['required'] . ", '" . $question['user_editable'] . "', :default_value, " . $question['break'] . ", " . $question['report'] . ", '" . $question['class'] . "', 1)";
+                (title, fid, weight, question_type, question_choices, question_choices_extend, match_type, match_regex, func_callback, min_length, max_length, required, user_editable, default_value, break, report, class, status) VALUES
+                ('" . $question['title'] . "', " . $question['question_form'] . ", " . $weight . ", '" . $question['question_type'] . "', '" . $question['question_choices'] . "', '" . $question['question_choices_extend'] . "', '" . $question['match_type'] . "',
+                '" . $question['match_regex'] . "', '" . $question['func_callback'] . "', " . $question['min_length'] . ", " . $question['max_length'] . ",
+                " . $question['required'] . ", '" . $question['user_editable'] . "', :default_value, " . $question['break'] . ", " . $question['report'] . ", '" . $question['class'] . "', 1)";
 
             $data_insert = array();
             $data_insert['default_value'] = $question['default_value'];
@@ -319,18 +323,18 @@ if ($nv_Request->isset_request('submit', 'post')) {
         } else {
             $query = "UPDATE " . NV_PREFIXLANG . "_" . $module_data . "_question SET";
             $query .= " question_choices='" . $question['question_choices'] . "', question_choices_extend='" . $question['question_choices_extend'] . "', match_type='" . $question['match_type'] . "',
-				match_regex='" . $question['match_regex'] . "', func_callback='" . $question['func_callback'] . "', ";
+                match_regex='" . $question['match_regex'] . "', func_callback='" . $question['func_callback'] . "', ";
             $query .= " max_length=" . $question['max_length'] . ", min_length=" . $question['min_length'] . ",
-				title = '" . $question['title'] . "',
-				fid = " . $question['question_form'] . ",
-				required = '" . $question['required'] . "',
-				question_type = '" . $question['question_type'] . "',
-				user_editable = '" . $question['user_editable'] . "',
-				default_value= :default_value,
-				break = " . $question['break'] . ",
-				report = " . $question['report'] . ",
-			    class = '" . $question['class'] . "'
-				WHERE qid = " . $qid;
+                title = '" . $question['title'] . "',
+                fid = " . $question['question_form'] . ",
+                required = '" . $question['required'] . "',
+                question_type = '" . $question['question_type'] . "',
+                user_editable = '" . $question['user_editable'] . "',
+                default_value= :default_value,
+                break = " . $question['break'] . ",
+                report = " . $question['report'] . ",
+                class = '" . $question['class'] . "'
+                WHERE qid = " . $qid;
 
             $stmt = $db->prepare($query);
             $stmt->bindParam(':default_value', $question['default_value'], PDO::PARAM_STR, strlen($question['default_value']));
@@ -592,7 +596,8 @@ foreach ($myini['exts'] as $key => $name) {
     $xtpl->parse('main.exts');
 }
 
-if (defined('NV_EDITOR')) require_once NV_ROOTDIR . '/' . NV_EDITORSDIR . '/' . NV_EDITOR . '/nv.php';
+if (defined('NV_EDITOR'))
+    require_once NV_ROOTDIR . '/' . NV_EDITORSDIR . '/' . NV_EDITOR . '/nv.php';
 
 $question['title'] = htmlspecialchars(nv_editor_br2nl($question['title']));
 if (defined('NV_EDITOR') and nv_function_exists('nv_aleditor')) {

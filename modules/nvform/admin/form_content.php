@@ -7,7 +7,10 @@
  * @License GNU/GPL version 2 or any later version
  * @Createdate Tue, 08 Apr 2014 15:13:43 GMT
  */
-if (!defined('NV_IS_FILE_ADMIN')) die('Stop!!!');
+
+if (!defined('NV_IS_FILE_ADMIN')) {
+    die('Stop!!!');
+}
 
 $page_title = $lang_module['form_content'];
 
@@ -46,7 +49,7 @@ $form_data = array(
 if ($id > 0) {
     $sql = 'SELECT * FROM ' . NV_PREFIXLANG . '_' . $module_data . ' WHERE id = ' . $id;
     $form_data = $db->query($sql)->fetch();
-    
+
     if (empty($form_data)) {
         Header('Location: ' . NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name);
         die();
@@ -62,7 +65,7 @@ if ($id > 0) {
             'listmail' => ''
         );
     }
-    
+
     $page_title = $lang_module['form_edit'] . ': ' . $form_data['title'];
     $lang_summit = $lang_module['form_edit'];
     $action = NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=' . $op . '&amp;id=' . $id;
@@ -96,7 +99,7 @@ if ($nv_Request->get_int('save', 'post') == '1') {
         $form_data['form_report_type_email'] = '';
     }
     $form_data['template'] = $nv_Request->get_array('template', 'post', array());
-    
+
     if (!empty($form_data['start_time']) and preg_match('/^([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})$/', $form_data['start_time'], $m)) {
         $phour = $nv_Request->get_int('phour', 'post', 0);
         $pmin = $nv_Request->get_int('pmin', 'post', 0);
@@ -104,7 +107,7 @@ if ($nv_Request->get_int('save', 'post') == '1') {
     } else {
         $form_data['start_time'] = NV_CURRENTTIME;
     }
-    
+
     if (!empty($form_data['end_time']) and preg_match('/^([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})$/', $form_data['end_time'], $m)) {
         $ehour = $nv_Request->get_int('ehour', 'post', 0);
         $emin = $nv_Request->get_int('emin', 'post', 0);
@@ -112,10 +115,10 @@ if ($nv_Request->get_int('save', 'post') == '1') {
     } else {
         $form_data['end_time'] = 0;
     }
-    
+
     $_groups_post = $nv_Request->get_array('groups_view', 'post', 6);
     $form_data['groups_view'] = !empty($_groups_post) ? implode(',', nv_groups_post(array_intersect($_groups_post, array_keys($groups_list)))) : '';
-    
+
     if (empty($form_data['title'])) {
         $error = $lang_module['error_formtitle'];
     } elseif (!empty($form_data['start_time']) and !empty($form_data['end_time'])) {
@@ -123,12 +126,12 @@ if ($nv_Request->get_int('save', 'post') == '1') {
             $error = $lang_module['error_formtime'];
         }
     }
-    
+
     if (!empty($form_data['template']['background_image'])) {
         $path = strlen(NV_BASE_SITEURL . NV_UPLOADS_DIR . '/' . $module_upload . '/');
         $form_data['template']['background_image'] = substr($form_data['template']['background_image'], $path);
     }
-    
+
     if (empty($error)) {
         $form_data['template'] = serialize($form_data['template']);
         $form_data['description_html'] = nv_editor_nl2br($form_data['description_html']);
@@ -141,10 +144,10 @@ if ($nv_Request->get_int('save', 'post') == '1') {
         } else {
             $weight = $db->query("SELECT MAX(weight) FROM " . NV_PREFIXLANG . "_" . $module_data)->fetchColumn();
             $weight = intval($weight) + 1;
-            
+
             $sql = 'INSERT INTO ' . NV_PREFIXLANG . '_' . $module_data . ' (title, alias, description, description_html, image, start_time, end_time, groups_view, user_editable, question_display, question_report, form_report_type, form_report_type_email, template, weight, add_time, status) VALUES (:title, :alias, :description, :description_html, :image, :start_time, :end_time, :groups_view, :user_editable, :question_display, :question_report, :form_report_type, :form_report_type_email, :template, ' . $weight . ', ' . NV_CURRENTTIME . ', 1)';
         }
-        
+
         $query = $db->prepare($sql);
         $query->bindParam(':title', $form_data['title'], PDO::PARAM_STR);
         $query->bindParam(':alias', $form_data['alias'], PDO::PARAM_STR);
@@ -160,14 +163,14 @@ if ($nv_Request->get_int('save', 'post') == '1') {
         $query->bindParam(':form_report_type', $form_data['form_report_type'], PDO::PARAM_INT);
         $query->bindParam(':form_report_type_email', $form_data['form_report_type_email'], PDO::PARAM_STR);
         $query->bindParam(':template', $form_data['template'], PDO::PARAM_STR);
-        
+
         if ($query->execute()) {
             if ($id) {
                 nv_insert_logs(NV_LANG_DATA, $module_name, 'Edit', 'Form: ' . $id . ' - ' . $form_data['title'], $admin_info['userid']);
             } else {
                 nv_insert_logs(NV_LANG_DATA, $module_name, 'Add', 'Form: ' . $form_data['title'], $admin_info['userid']);
             }
-            
+
             $nv_Cache->delMod($module_name);
             Header('Location: ' . NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name);
             die();
@@ -256,12 +259,15 @@ foreach ($style_list as $key => $_title) {
     $xtpl->parse('main.question_display');
 }
 
-if (empty($alias)) $xtpl->parse('main.get_alias');
+if (empty($alias))
+    $xtpl->parse('main.get_alias');
 
 // Trình soạn thảo
-if (!empty($form_data['description_html'])) $form_data['description_html'] = nv_htmlspecialchars($form_data['description_html']);
+if (!empty($form_data['description_html']))
+    $form_data['description_html'] = nv_htmlspecialchars($form_data['description_html']);
 
-if (defined('NV_EDITOR')) require_once NV_ROOTDIR . '/' . NV_EDITORSDIR . '/' . NV_EDITOR . '/nv.php';
+if (defined('NV_EDITOR'))
+    require_once NV_ROOTDIR . '/' . NV_EDITORSDIR . '/' . NV_EDITOR . '/nv.php';
 
 if (defined('NV_EDITOR') and nv_function_exists('nv_aleditor')) {
     $form_data['description_html'] = nv_aleditor('description_html', '100%', '300px', $form_data['description_html']);

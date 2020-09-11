@@ -7,7 +7,10 @@
  * @License GNU/GPL version 2 or any later version
  * @Createdate 24-06-2011 10:35
  */
-if (!defined('NV_IS_FILE_ADMIN')) die('Stop!!!');
+
+if (!defined('NV_IS_FILE_ADMIN')) {
+    die('Stop!!!');
+}
 
 $page_title = $lang_module['question_list'];
 $array = array();
@@ -15,7 +18,8 @@ $where = '';
 
 // Xóa câu hỏi
 if ($nv_Request->isset_request('del', 'post')) {
-    if (!defined('NV_IS_AJAX')) die('Wrong URL');
+    if (!defined('NV_IS_AJAX'))
+        die('Wrong URL');
 
     $qid = $nv_Request->get_int('qid', 'post', 0);
 
@@ -106,7 +110,8 @@ foreach ($_rows as $row) {
     }
     $xtpl->assign('FIELD_TYPE_TEXT', $array_field_type[$row['question_type']]);
 
-    if ($row['break']) $page++;
+    if ($row['break'])
+        $page++;
     $row['page'] = $page;
 
     $row['title'] = nv_get_plaintext($row['title']);

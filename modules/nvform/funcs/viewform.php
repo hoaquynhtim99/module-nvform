@@ -7,7 +7,10 @@
  * @License GNU/GPL version 2 or any later version
  * @Createdate Tue, 08 Apr 2014 15:13:43 GMT
  */
-if (!defined('NV_IS_MOD_NVFORM')) die('Stop!!!');
+
+if (!defined('NV_IS_MOD_NVFORM')) {
+    die('Stop!!!');
+}
 
 $form_info = $db->query("SELECT * FROM " . NV_PREFIXLANG . '_' . $module_data . " WHERE id = " . $fid)->fetch();
 if (empty($form_info)) {

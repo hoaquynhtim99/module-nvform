@@ -7,7 +7,10 @@
  * @License GNU/GPL version 2 or any later version
  * @Createdate Tue, 08 Apr 2014 15:13:43 GMT
  */
-if (!defined('NV_SYSTEM')) die('Stop!!!');
+
+if (!defined('NV_SYSTEM')) {
+    die('Stop!!!');
+}
 
 define('NV_IS_MOD_NVFORM', true);
 require_once NV_ROOTDIR . '/modules/' . $module_file . '/global.functions.php';

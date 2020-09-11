@@ -7,18 +7,23 @@
  * @License GNU/GPL version 2 or any later version
  * @Createdate 24-06-2011 10:35
  */
-if (!defined('NV_IS_FILE_ADMIN')) die('Stop!!!');
+
+if (!defined('NV_IS_FILE_ADMIN')) {
+    die('Stop!!!');
+}
 
 $fid = $nv_Request->get_int('fid', 'get', 0);
 $question_data = $answer_data = array();
 
 // Xoa cau tra loi
 if ($nv_Request->isset_request('del', 'post')) {
-    if (!defined('NV_IS_AJAX')) die('Wrong URL');
+    if (!defined('NV_IS_AJAX'))
+        die('Wrong URL');
 
     $aid = $nv_Request->get_int('aid', 'post', 0);
 
-    if (empty($aid)) die('NO');
+    if (empty($aid))
+        die('NO');
 
     $answer = $db->query('SELECT answer FROM ' . NV_PREFIXLANG . '_' . $module_data . '_answer WHERE id = ' . $aid)->fetchColumn();
 
