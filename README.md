@@ -5,7 +5,7 @@ Module cho phép tạo form khảo sát (Tương tự công cụ tạo form củ
 ## Giấy phép
 Module được phát hành theo giấy phép GNU/GPL v2 hoặc các phiên bản cao hơn.
 
-Xem [LICENSE.txt](LICENSE.txt) để biết thêm thông tin.
+Xem [LICENSE](LICENSE) để biết thêm thông tin.
 
 ## Cài đặt
 - Tải về mã nguồn
