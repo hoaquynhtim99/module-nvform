@@ -30,7 +30,7 @@ function nv_theme_nvform_main($array_data, $nv_alias_page)
         foreach ($array_data as $data) {
             $data['time'] = nv_date('H:i d/m/Y', $data['start_time']);
             $data['time'] = !empty($data['end_time']) ? $data['time'] . ' - ' . nv_date('H:i d/m/Y', $data['end_time']) : $data['time'];
-            $data['link'] = NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '/' . $data['alias'] . '-' . $data['id'];
+            $data['link'] = NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '/' . $data['alias'] . '-' . $data['id'] . $global_config['rewrite_exturl'];
             $xtpl->assign('DATA', $data);
             $xtpl->parse('main.loop');
         }
@@ -47,7 +47,6 @@ function nv_theme_nvform_main($array_data, $nv_alias_page)
     include (NV_ROOTDIR . "/includes/header.php");
     echo nv_site_theme($contents);
     include (NV_ROOTDIR . "/includes/footer.php");
-    exit();
 }
 
 /**
@@ -172,7 +171,6 @@ function nv_theme_nvform_alert($message_title, $message_content, $type = 'info',
     include (NV_ROOTDIR . "/includes/header.php");
     echo nv_site_theme($contents, !$embed);
     include (NV_ROOTDIR . "/includes/footer.php");
-    exit();
 }
 
 /**
@@ -290,5 +288,4 @@ function nv_theme_nvform_viewanalytics($form_info, $question_info, $answer_info)
     include (NV_ROOTDIR . "/includes/header.php");
     echo nv_site_theme($contents);
     include (NV_ROOTDIR . "/includes/footer.php");
-    exit();
 }

@@ -12,12 +12,14 @@ if (!defined('NV_IS_FILE_MODULES')) {
     die('Stop!!!');
 }
 
-$sql_drop_module = array();
-$sql_drop_module[] = "DROP TABLE IF EXISTS " . $db_config['prefix'] . "_" . $lang . "_" . $module_data . "";
+$sql_drop_module = [];
+$sql_drop_module[] = "DROP TABLE IF EXISTS " . $db_config['prefix'] . "_" . $lang . "_" . $module_data;
 $sql_drop_module[] = "DROP TABLE IF EXISTS " . $db_config['prefix'] . "_" . $lang . "_" . $module_data . "_answer";
 $sql_drop_module[] = "DROP TABLE IF EXISTS " . $db_config['prefix'] . "_" . $lang . "_" . $module_data . "_question";
 
 $sql_create_module = $sql_drop_module;
+
+// Bảng biểu mẫu khảo sát
 $sql_create_module[] = "CREATE TABLE " . $db_config['prefix'] . "_" . $lang . "_" . $module_data . "(
   id mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
   title varchar(250) NOT NULL,
@@ -41,6 +43,7 @@ $sql_create_module[] = "CREATE TABLE " . $db_config['prefix'] . "_" . $lang . "_
   UNIQUE KEY alias (alias)
 ) ENGINE=MyISAM";
 
+// Bảng trả lời các câu hỏi
 $sql_create_module[] = "CREATE TABLE " . $db_config['prefix'] . "_" . $lang . "_" . $module_data . "_answer(
   id mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
   fid mediumint(8) NOT NULL DEFAULT '0',
@@ -52,6 +55,7 @@ $sql_create_module[] = "CREATE TABLE " . $db_config['prefix'] . "_" . $lang . "_
   PRIMARY KEY (id)
 ) ENGINE=MyISAM";
 
+// Bảng câu hỏi
 $sql_create_module[] = "CREATE TABLE " . $db_config['prefix'] . "_" . $lang . "_" . $module_data . "_question(
   qid mediumint(8) NOT NULL AUTO_INCREMENT,
   title text NOT NULL,

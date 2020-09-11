@@ -13,7 +13,7 @@ if (!defined('NV_IS_FILE_ADMIN')) {
 }
 
 $page_title = $lang_module['form_list'];
-$array = array();
+$array = [];
 
 // Del form
 if ($nv_Request->isset_request('del', 'post')) {
@@ -66,26 +66,27 @@ $xtpl->assign('TEMPLATE', $global_config['module_theme']);
 $i = 0;
 foreach ($_rows as $row) {
     $row['qlist'] = NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=question&amp;fid=' . $row['id'];
-    $row['url_view'] = NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=' . $row['alias'] . '-' . $row['id'];
+    $row['url_view'] = NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=' . $row['alias'] . '-' . $row['id'] . $global_config['rewrite_exturl'];
     $row['url_edit'] = NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=form_content&amp;id=' . $row['id'];
     $row['url_report'] = NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=report&amp;fid=' . $row['id'];
     $row['url_copy'] = NV_MY_DOMAIN . nv_url_rewrite($row['url_view'], true);
-    $row['embed_copy'] = '<embed width="100%" src="' . NV_MY_DOMAIN . $row['url_view'] . '&amp;embed=1' . '"></embed>';
+    $row['embed_copy'] = '<iframe style="width: 100%;" height="315" src="' . NV_MY_DOMAIN . nv_url_rewrite($row['url_view'] . '&amp;embed=1', true) . '" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+    $row['embed_copy'] = nv_htmlspecialchars($row['embed_copy']);
 
     for ($i = 1; $i <= $num; ++$i) {
-        $xtpl->assign('WEIGHT', array(
+        $xtpl->assign('WEIGHT', [
             'w' => $i,
             'selected' => ($i == $row['weight']) ? ' selected="selected"' : ''
-        ));
+        ]);
         $xtpl->parse('main.row.weight');
     }
 
     foreach ($array_status as $key => $val) {
-        $xtpl->assign('STATUS', array(
+        $xtpl->assign('STATUS', [
             'key' => $key,
             'val' => $val,
             'selected' => ($key == $row['status']) ? ' selected="selected"' : ''
-        ));
+        ]);
         $xtpl->parse('main.row.status');
     }
 
