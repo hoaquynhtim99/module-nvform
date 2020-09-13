@@ -19,7 +19,11 @@ $error = '';
 $phour = $pmin = $ehour = $emin = 0;
 $groups_list = nv_groups_list();
 
-$form_data = array(
+// Lấy danh sách các trình xuất kết quả
+$array_exporter = nv_scandir(NV_ROOTDIR . '/modules/' . $module_file . '/exporter', '/^[a-zA-Z0-9\-\_]+\.php$/');
+$array_exporter = array_diff($array_exporter, ['default.php']);
+
+$form_data = [
     'who_view' => '',
     'groups_view' => 6,
     'description' => '',
@@ -32,38 +36,38 @@ $form_data = array(
     'question_report' => 1,
     'user_editable' => 1,
     'form_report_type' => 0,
-    'form_report_type_email' => array(
+    'form_report_type_email' => [
         'form_report_type_email' => 0,
-        'group_email' => array(),
+        'group_email' => [],
         'listmail' => ''
-    ),
-    'template' => array(
+    ],
+    'template' => [
         'background_color' => '',
         'background_image' => '',
         'background_imgage_repeat' => '',
         'background_imgage_position' => ''
-    ),
-    'status' => 1
-);
+    ],
+    'status' => 1,
+    'export_handler' => ''
+];
 
 if ($id > 0) {
     $sql = 'SELECT * FROM ' . NV_PREFIXLANG . '_' . $module_data . ' WHERE id = ' . $id;
     $form_data = $db->query($sql)->fetch();
 
     if (empty($form_data)) {
-        Header('Location: ' . NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name);
-        die();
+        nv_redirect_location(NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name);
     }
     $form_data['template'] = unserialize($form_data['template']);
     if ($form_data['form_report_type'] == 1) {
         $form_data['form_report_type_email'] = unserialize($form_data['form_report_type_email']);
     }
     if (empty($form_data['form_report_type_email'])) {
-        $form_data['form_report_type_email'] = array(
+        $form_data['form_report_type_email'] = [
             'form_report_type_email' => 0,
-            'group_email' => array(),
+            'group_email' => [],
             'listmail' => ''
-        );
+        ];
     }
 
     $page_title = $lang_module['form_edit'] . ': ' . $form_data['title'];
@@ -87,18 +91,19 @@ if ($nv_Request->get_int('save', 'post') == '1') {
     $form_data['user_editable'] = $nv_Request->get_int('user_editable', 'post', 0);
     $form_data['question_report'] = $nv_Request->get_int('question_report', 'post', 0);
     $form_data['form_report_type'] = $nv_Request->get_int('form_report_type', 'post', 0);
-    $form_data['form_report_type_email'] = array();
+    $form_data['status'] = $nv_Request->get_int('status', 'post', 0);
+    $form_data['form_report_type_email'] = [];
     if ($form_data['form_report_type'] == 1) {
-        $array = array(
+        $array = [
             'form_report_type_email' => $nv_Request->get_int('form_report_type_email', 'post', 0),
             'group_email' => $nv_Request->get_typed_array('group_email', 'post', 'int'),
             'listmail' => $nv_Request->get_title('listmail', 'post', '')
-        );
+        ];
         $form_data['form_report_type_email'] = serialize($array);
     } else {
         $form_data['form_report_type_email'] = '';
     }
-    $form_data['template'] = $nv_Request->get_array('template', 'post', array());
+    $form_data['template'] = $nv_Request->get_array('template', 'post', []);
 
     if (!empty($form_data['start_time']) and preg_match('/^([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})$/', $form_data['start_time'], $m)) {
         $phour = $nv_Request->get_int('phour', 'post', 0);
@@ -132,6 +137,11 @@ if ($nv_Request->get_int('save', 'post') == '1') {
         $form_data['template']['background_image'] = substr($form_data['template']['background_image'], $path);
     }
 
+    $form_data['export_handler'] = $nv_Request->get_title('export_handler', 'post', '');
+    if (!in_array($form_data['export_handler'] . '.php', $array_exporter) or $form_data['export_handler'] == 'default') {
+        $form_data['export_handler'] = '';
+    }
+
     if (empty($error)) {
         $form_data['template'] = serialize($form_data['template']);
         $form_data['description_html'] = nv_editor_nl2br($form_data['description_html']);
@@ -140,12 +150,27 @@ if ($nv_Request->get_int('save', 'post') == '1') {
             $form_data['image'] = substr($form_data['image'], $lu);
         }
         if ($id) {
-            $sql = 'UPDATE ' . NV_PREFIXLANG . '_' . $module_data . ' SET title = :title, alias = :alias, description = :description, description_html = :description_html, image = :image, start_time = :start_time, end_time = :end_time, groups_view = :groups_view, user_editable = :user_editable, question_display = :question_display, question_report = :question_report, form_report_type = :form_report_type, form_report_type_email = :form_report_type_email, template = :template WHERE id =' . $id;
+            $sql = 'UPDATE ' . NV_PREFIXLANG . '_' . $module_data . ' SET
+                title = :title, alias = :alias, description = :description,
+                description_html = :description_html, image = :image, start_time = :start_time,
+                end_time = :end_time, groups_view = :groups_view, user_editable = :user_editable,
+                question_display = :question_display, question_report = :question_report,
+                form_report_type = :form_report_type, form_report_type_email = :form_report_type_email,
+                template = :template, export_handler=:export_handler, status=' . $form_data['status'] . '
+            WHERE id =' . $id;
         } else {
             $weight = $db->query("SELECT MAX(weight) FROM " . NV_PREFIXLANG . "_" . $module_data)->fetchColumn();
             $weight = intval($weight) + 1;
 
-            $sql = 'INSERT INTO ' . NV_PREFIXLANG . '_' . $module_data . ' (title, alias, description, description_html, image, start_time, end_time, groups_view, user_editable, question_display, question_report, form_report_type, form_report_type_email, template, weight, add_time, status) VALUES (:title, :alias, :description, :description_html, :image, :start_time, :end_time, :groups_view, :user_editable, :question_display, :question_report, :form_report_type, :form_report_type_email, :template, ' . $weight . ', ' . NV_CURRENTTIME . ', 1)';
+            $sql = 'INSERT INTO ' . NV_PREFIXLANG . '_' . $module_data . ' (
+                title, alias, description, description_html, image, start_time,
+                end_time, groups_view, user_editable, question_display, question_report,
+                form_report_type, form_report_type_email, template, weight, add_time, status, export_handler
+            ) VALUES (
+                :title, :alias, :description, :description_html, :image, :start_time,
+                :end_time, :groups_view, :user_editable, :question_display, :question_report,
+                :form_report_type, :form_report_type_email, :template, ' . $weight . ', ' . NV_CURRENTTIME . ', 1, :export_handler
+            )';
         }
 
         $query = $db->prepare($sql);
@@ -163,6 +188,7 @@ if ($nv_Request->get_int('save', 'post') == '1') {
         $query->bindParam(':form_report_type', $form_data['form_report_type'], PDO::PARAM_INT);
         $query->bindParam(':form_report_type_email', $form_data['form_report_type_email'], PDO::PARAM_STR);
         $query->bindParam(':template', $form_data['template'], PDO::PARAM_STR);
+        $query->bindParam(':export_handler', $form_data['export_handler'], PDO::PARAM_STR);
 
         if ($query->execute()) {
             if ($id) {
@@ -235,27 +261,27 @@ $xtpl->assign('emin', $select);
 // System groups user
 $groups_view = explode(',', $form_data['groups_view']);
 foreach ($groups_list as $_group_id => $_title) {
-    $xtpl->assign('GR_VIEW', array(
+    $xtpl->assign('GR_VIEW', [
         'value' => $_group_id,
         'checked' => in_array($_group_id, $groups_view) ? ' checked="checked"' : '',
         'title' => $_title
-    ));
+    ]);
     $xtpl->parse('main.group_view');
 }
 
 // Kieu hien thi
-$style_list = array(
+$style_list = [
     'question_display_top' => $lang_module['form_question_display_top'],
     'question_display_left' => $lang_module['form_question_display_left'],
     'question_display_two_column' => $lang_module['form_question_display_two_column']
-);
+];
 
 foreach ($style_list as $key => $_title) {
-    $xtpl->assign('STYLE', array(
+    $xtpl->assign('STYLE', [
         'value' => $key,
         'title' => $_title,
         'seleced' => $form_data['question_display'] == $key ? ' selected="selected"' : ''
-    ));
+    ]);
     $xtpl->parse('main.question_display');
 }
 
@@ -279,23 +305,23 @@ if (!empty($form_data['image']) and file_exists(NV_UPLOADS_REAL_DIR . '/' . $mod
     $form_data['image'] = NV_BASE_SITEURL . NV_UPLOADS_DIR . '/' . $module_upload . '/' . $form_data['image'];
 }
 
-$array_background_repeat = array(
+$array_background_repeat = [
     'repeat' => $lang_module['form_template_background_image_repeat_repeat'],
     'repeat-x' => $lang_module['form_template_background_image_repeat_x'],
     'repeat-y' => $lang_module['form_template_background_image_repeat_y'],
     'no-repeat' => $lang_module['form_template_background_image_no_repeat']
-);
+];
 foreach ($array_background_repeat as $key => $value) {
     $sl = $key == $form_data['template']['background_imgage_repeat'] ? 'selected="selected"' : '';
-    $xtpl->assign('REPEAT', array(
+    $xtpl->assign('REPEAT', [
         'key' => $key,
         'value' => $value,
         'selected' => $sl
-    ));
+    ]);
     $xtpl->parse('main.background_repeat');
 }
 
-$array_background_position = array(
+$array_background_position = [
     'left_top' => $lang_module['form_template_background_image_position_left_top'],
     'left_center' => $lang_module['form_template_background_image_position_left_center'],
     'left_bottom' => $lang_module['form_template_background_image_position_left_bottom'],
@@ -305,51 +331,51 @@ $array_background_position = array(
     'center_top' => $lang_module['form_template_background_image_position_center_top'],
     'center_center' => $lang_module['form_template_background_image_position_center_center'],
     'center_bottom' => $lang_module['form_template_background_image_position_center_bottom']
-);
+];
 foreach ($array_background_position as $key => $value) {
     $sl = $key == $form_data['template']['background_imgage_position'] ? 'selected="selected"' : '';
-    $xtpl->assign('POSITION', array(
+    $xtpl->assign('POSITION', [
         'key' => $key,
         'value' => $value,
         'selected' => $sl
-    ));
+    ]);
     $xtpl->parse('main.background_position');
 }
 
-$form_report_type = array(
+$form_report_type = [
     '0' => $lang_module['form_report_type_acp'],
     '1' => $lang_module['form_report_type_all']
-);
+];
 foreach ($form_report_type as $key => $value) {
     $ck = $key == $form_data['form_report_type'] ? 'checked="checked"' : '';
-    $xtpl->assign('REPORT_TYPE', array(
+    $xtpl->assign('REPORT_TYPE', [
         'key' => $key,
         'value' => $value,
         'checked' => $ck
-    ));
+    ]);
     $xtpl->parse('main.form_report_type');
 }
 
-$array_form_report_type_email = array(
+$array_form_report_type_email = [
     '0' => $lang_module['form_report_type_email_groups'],
     '1' => $lang_module['form_report_type_email_maillist']
-);
+];
 foreach ($array_form_report_type_email as $key => $value) {
     $ck = $key == $form_data['form_report_type_email'] ? 'checked="checked"' : '';
-    $xtpl->assign('REPORT_TYPE_EMAIL', array(
+    $xtpl->assign('REPORT_TYPE_EMAIL', [
         'key' => $key,
         'value' => $value,
         'checked' => $ck
-    ));
+    ]);
     $xtpl->parse('main.form_report_type_email');
 }
 
 foreach ($groups_list as $_group_id => $_title) {
-    $xtpl->assign('GR_EMAIL', array(
+    $xtpl->assign('GR_EMAIL', [
         'value' => $_group_id,
         'checked' => in_array($_group_id, $form_report_type_email['group_email']) ? ' checked="checked"' : '',
         'title' => $_title
-    ));
+    ]);
     $xtpl->parse('main.group_email');
 }
 
@@ -364,12 +390,24 @@ if ($form_report_type_email['form_report_type_email'] == 1) {
 }
 
 foreach ($array_status as $key => $val) {
-    $xtpl->assign('STATUS', array(
+    $xtpl->assign('STATUS', [
         'key' => $key,
         'val' => $val,
         'selected' => ($key == $form_data['status']) ? ' selected="selected"' : ''
-    ));
+    ]);
     $xtpl->parse('main.status');
+}
+
+// Xuất trình xử lý kết quả
+foreach ($array_exporter as $exporter) {
+    $exporter = substr($exporter, 0, -4);
+
+    $xtpl->assign('EXPORT_HANDLER', [
+        'key' => $exporter,
+        'title' => $exporter,
+        'selected' => $exporter == $form_data['export_handler'] ? ' selected="selected"' : ''
+    ]);
+    $xtpl->parse('main.export_handler');
 }
 
 if ($error) {

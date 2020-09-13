@@ -18,10 +18,12 @@ $lang_translator['copyright'] = '@Copyright (C) 2014 VINADES.,JSC. All rights re
 $lang_translator['info'] = '';
 $lang_translator['langtype'] = 'lang_module';
 
+$lang_module['error_savefile'] = 'Lỗi lưu tập tin trên máy chủ';
+$lang_module['error'] = 'Lỗi';
 $lang_module['success'] = 'Hoàn tất';
 $lang_module['success_info'] = 'Thông tin trả lời của bạn đã được hệ thống ghi nhận.';
-$lang_module['success_user_info'] = 'Bạn có thể xem lại thông tin trả lời tại <a href="%s">đây</a>';
-$lang_module['success_user_info_report'] = 'Bạn có thể xem lại thông tin trả lời tại <a href="%s" title="Xem lại câu trả lời">đây</a> hoặc xem báo cáo tổng quát tại <a href="%s" title="Xem báo cáo">đây</a>';
+$lang_module['success_user_info'] = 'Bạn có thể xem lại thông tin và xuất kết quả trả lời tại <a href="%s">đây</a>';
+$lang_module['success_user_info_report'] = 'Bạn có thể xem lại thông tin, xuất kết quả trả lời tại <a href="%s" title="Xem lại câu trả lời">đây</a> hoặc xem báo cáo tổng quát tại <a href="%s" title="Xem báo cáo">đây</a>';
 $lang_module['form_close_info'] = 'Biểu mẫu này sẽ được đóng vào ngày %s';
 $lang_module['reset'] = 'Làm lại';
 $lang_module['next'] = 'Tiếp tục';
@@ -32,6 +34,7 @@ $lang_module['answer_count'] = 'Số lượt trả lời';
 $lang_module['reply'] = 'Trả lời';
 $lang_module['answer'] = 'Trả lời';
 $lang_module['question'] = 'Câu hỏi';
+$lang_module['export'] = 'Xuất kết quả';
 
 $lang_module['report_who_answer'] = 'Người trả lời';
 $lang_module['report_answer_time'] = 'Thời gian trả lời';

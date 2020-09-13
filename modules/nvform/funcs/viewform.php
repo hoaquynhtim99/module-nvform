@@ -12,7 +12,10 @@ if (!defined('NV_IS_MOD_NVFORM')) {
     die('Stop!!!');
 }
 
-$form_info = $db->query("SELECT * FROM " . NV_PREFIXLANG . '_' . $module_data . " WHERE id = " . $fid)->fetch();
+use PhpOffice\PhpWord\IOFactory;
+use NukeViet\Files\Download;
+
+$form_info = $db->query("SELECT * FROM " . NV_PREFIXLANG . '_' . $module_data . " WHERE id = " . intval($fid))->fetch();
 if (empty($form_info)) {
     nv_theme_nvform_alert($form_info['title'], $lang_module['error_form_not_found_detail']);
 }
@@ -40,16 +43,22 @@ if (!nv_user_in_groups($form_info['groups_view'])) {
     nv_theme_nvform_alert($form_info['title'], $lang_module['error_form_not_premission_detail'], 'warning');
 }
 
-// Lấy thông tin câu hỏi
+// Lấy các câu hỏi
 $question_info = $db->query("SELECT * FROM " . NV_PREFIXLANG . '_' . $module_data . "_question WHERE fid = " . $fid . " AND status = 1 ORDER BY weight")->fetchAll();
 
 $info = '';
 $filled = false;
-$answer_info = $answer_info_extend = $old_answer_info = $old_answer_info_extend = array();
+$answer_info = $answer_info_extend = $old_answer_info = $old_answer_info_extend = $session_data = [];
 $embed = $nv_Request->isset_request('embed', 'get');
+$answer_id = 0;
 
 // Trạng thái trả lời
+$form_info['filled'] = false;
+$form_info['link'] = NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=' . $form_info['alias'] . '-' . $form_info['id'] . $global_config['rewrite_exturl'];
+$form_info['link_export'] = NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=' . $form_info['alias'] . '-' . $form_info['id'] . $global_config['rewrite_exturl'] . '&amp;export=1';
+
 if (defined('NV_IS_USER')) {
+    // Là thành viên thì lấy trực tiếp
     $sql = "SELECT * FROM " . NV_PREFIXLANG . '_' . $module_data . "_answer WHERE fid = " . $fid . " AND who_answer = " . $user_info['userid'];
     $_rows = $db->query($sql)->fetch();
 
@@ -58,9 +67,77 @@ if (defined('NV_IS_USER')) {
         $form_info['filled'] = true;
         $answer_info = unserialize($_rows['answer']);
         $answer_info_extend = unserialize($_rows['answer_extend']);
+        $answer_id = $_rows['id'];
+    }
+} else {
+    // Không là thành viên thì kiểm tra session
+    $session_data = $nv_Request->get_title($module_data . '_answer', 'session', '');
+    $session_data = json_decode($crypt->decrypt($session_data), true);
+    if (!is_array($session_data)) {
+        $session_data = [];
+    }
+    if (isset($session_data[$form_info['id']]) and is_array($session_data[$form_info['id']]) and !empty($session_data[$form_info['id']]['keycode']) and !empty($session_data[$form_info['id']]['data'])) {
+        $sql = "SELECT * FROM " . NV_PREFIXLANG . '_' . $module_data . "_answer
+        WHERE fid = " . $fid . " AND answer_code = " . $db->quote($session_data[$form_info['id']]['keycode']);
+        $_rows = $db->query($sql)->fetch();
+
+        if (!empty($_rows)) {
+            $check_data = json_decode($crypt->decrypt($session_data[$form_info['id']]['data'], $_rows['secret_code']), true);
+            if (
+                is_array($check_data) and !empty($check_data['time']) and
+                !empty($check_data['ip']) and !empty($check_data['agent']) and
+                $check_data['time'] == $_rows['answer_time'] and $check_data['ip'] == $_rows['answer_ip'] and
+                $check_data['agent'] == $_rows['answer_agent']
+            ) {
+                $filled = true;
+                $form_info['filled'] = true;
+                $answer_info = unserialize($_rows['answer']);
+                $answer_info_extend = unserialize($_rows['answer_extend']);
+                $answer_id = $_rows['id'];
+            }
+        }
     }
 }
 
+// Xuất kết quả ra Word
+if ($nv_Request->isset_request('export', 'get')) {
+    // Chưa trả lời thì có gì đâu mà xuất
+    if (!$form_info['filled']) {
+        nv_redirect_location($form_info['link']);
+    }
+    // Chưa cài đặt thư viện thì không xuất được
+    if (!class_exists('PhpOffice\PhpWord\PhpWord')) {
+        nv_redirect_location($form_info['link']);
+    }
+
+    // Xác định trình xuất kết quả
+    $exporter_file = NV_ROOTDIR . '/modules/' . $module_file . '/exporter/default.php';
+    if (!empty($form_info['export_handler']) and $form_info['export_handler'] != 'default' and file_exists(NV_ROOTDIR . '/modules/' . $module_file . '/exporter/' . $form_info['export_handler'] . '.php')) {
+        $exporter_file = NV_ROOTDIR . '/modules/' . $module_file . '/exporter/' . $form_info['export_handler'] . '.php';
+    }
+    require $exporter_file;
+
+    $filepath = NV_ROOTDIR . '/' . NV_TEMP_DIR . '/' . NV_TEMPNAM_PREFIX . 'export' . $answer_id . '_' . NV_CHECK_SESSION;
+    if (file_exists($filepath)) {
+        nv_deletefile($filepath);
+    }
+
+    $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
+    $objWriter->save($filepath);
+    if (!file_exists($filepath)) {
+        $contents = nv_theme_alert($lang_module['error'], $lang_module['error_savefile'], 'danger');
+        include NV_ROOTDIR . '/includes/header.php';
+        echo nv_admin_theme($contents);
+        include NV_ROOTDIR . '/includes/footer.php';
+    }
+
+    $filename = substr(strtolower($form_info['alias']), 0, 100) . '.docx';
+    $download = new Download($filepath, NV_ROOTDIR . '/' . NV_TEMP_DIR, $filename);
+    $download->download_file();
+    die();
+}
+
+// Gửi dữ liệu lên
 if ($nv_Request->isset_request('submit', 'post')) {
     $error = '';
 
@@ -70,29 +147,63 @@ if ($nv_Request->isset_request('submit', 'post')) {
     }
 
     $answer_info = $nv_Request->get_array('question', 'post');
-    $answer_info_extend = $nv_Request->get_array('question_extend', 'post', array());
+    $answer_info_extend = $nv_Request->get_array('question_extend', 'post', []);
 
     require NV_ROOTDIR . '/modules/' . $module_file . '/form.check.php';
 
     if (empty($error)) {
         $userid = !defined('NV_IS_USER') ? 0 : $user_info['userid'];
         $answer_info['answer_time'] = $answer_info['answer_edit_time'] = NV_CURRENTTIME;
+
         if ($filled) {
-            $sth = $db->prepare("UPDATE " . NV_PREFIXLANG . '_' . $module_data . "_answer SET answer = :answer, answer_extend = :answer_extend, answer_edit_time = " . $answer_info['answer_edit_time'] . " WHERE fid = " . $fid . " AND who_answer = " . $userid);
+            $sql = "UPDATE " . NV_PREFIXLANG . '_' . $module_data . "_answer SET
+                answer = :answer, answer_extend = :answer_extend,
+                answer_edit_time = " . $answer_info['answer_edit_time'] . "
+            WHERE id=" . $answer_id;
         } else {
-            $sth = $db->prepare("INSERT INTO " . NV_PREFIXLANG . '_' . $module_data . "_answer (fid, answer, answer_extend, who_answer, answer_time) VALUES (" . $fid . ", :answer, :answer_extend, " . $userid . ", " . $answer_info['answer_time'] . ")");
+            if (empty($userid)) {
+                // Tạo mã bí mật để set session cho câu trả lời khi khách trả lời
+                $secret_code = nv_genpass(32);
+                $answer_code = nv_genpass(32);
+            } else {
+                // Thành viên trả lời lần đầu không cần mã bí mật
+                $secret_code = '';
+                $answer_code = '';
+            }
+
+            $sql = "INSERT INTO " . NV_PREFIXLANG . '_' . $module_data . "_answer (
+                fid, answer, answer_extend, who_answer, answer_time, answer_ip, answer_agent, secret_code, answer_code
+            ) VALUES (
+                " . $fid . ", :answer, :answer_extend, " . $userid . ", " . $answer_info['answer_time'] . ",
+                " . $db->quote(NV_CLIENT_IP) . ", " . $db->quote(NV_USER_AGENT) . ", " . $db->quote($secret_code) . ", " . $db->quote($answer_code) . "
+            )";
         }
+
         $_answer_info = serialize($answer_info);
         $_answer_info_extend = serialize($answer_info_extend);
+        $sth = $db->prepare($sql);
         $sth->bindParam(':answer', $_answer_info, PDO::PARAM_STR);
         $sth->bindParam(':answer_extend', $_answer_info_extend, PDO::PARAM_STR);
 
         if ($sth->execute()) {
+            if (!$filled and empty($userid)) {
+                // Khách trả lời lần đầu tạo session kết quả để thao tác trong phiên làm việc
+                $session_data[$form_info['id']] = [
+                    'keycode' => $answer_code,
+                    'data' => $crypt->encrypt(json_encode([
+                        'time' => $answer_info['answer_time'],
+                        'ip' => NV_CLIENT_IP,
+                        'agent' => NV_USER_AGENT
+                    ]), $secret_code)
+                ];
+                $nv_Request->set_Session($module_data . '_answer', $crypt->encrypt(json_encode($session_data)));
+            }
+
             // Báo cáo kết qủa qua email
             if (($form_info['form_report_type'] == 1) and !$filled) {
                 $form_report_type_email = unserialize($form_info['form_report_type_email']);
                 $subject = $lang_module['reply'] . ': ' . $form_info['title'];
-                $listmail = array();
+                $listmail = [];
 
                 // Lấy danh sách email
                 if ($form_report_type_email['form_report_type_email'] == 0 and !empty($form_report_type_email['group_email'])) {
@@ -122,15 +233,11 @@ if ($nv_Request->isset_request('submit', 'post')) {
                 }
             }
 
-            $info = $lang_module['success_info'];
-            if (defined('NV_IS_USER')) {
-                $link_form = NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=' . $form_info['alias'] . '-' . $form_info['id'] . $global_config['rewrite_exturl'];
-                if ($form_info['question_report']) {
-                    $link_report = NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=' . $module_info['alias']['viewanalytics'] . '/' . $form_info['alias'] . '-' . $form_info['id'] . $global_config['rewrite_exturl'];
-                    $info .= '<br />' . sprintf($lang_module['success_user_info_report'], $link_form, $link_report);
-                } else {
-                    $info .= '<br />' . sprintf($lang_module['success_user_info'], $link_form);
-                }
+            if ($form_info['question_report']) {
+                $link_report = NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=' . $module_info['alias']['viewanalytics'] . '/' . $form_info['alias'] . '-' . $form_info['id'] . $global_config['rewrite_exturl'];
+                $info .= '<br />' . sprintf($lang_module['success_user_info_report'], $form_info['link'], $link_report);
+            } else {
+                $info .= '<br />' . sprintf($lang_module['success_user_info'], $form_info['link']);
             }
             nv_theme_nvform_alert($lang_module['success'], $info, 'success', '', 0, $embed);
         }

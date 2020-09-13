@@ -80,6 +80,8 @@ $lang_module['form_template_background_image_position_right_bottom'] = 'Phải -
 $lang_module['form_template_background_image_position_center_top'] = 'Giữa - Trên';
 $lang_module['form_template_background_image_position_center_center'] = 'Giữa - Giữa';
 $lang_module['form_template_background_image_position_center_bottom'] = 'Giữa - Dưới';
+$lang_module['form_export_handler'] = 'Trình xuất kết quả';
+$lang_module['form_export_handler1'] = 'Tùy chỉnh mẫu kết quả khảo sát ngoài site';
 
 $lang_module['report_who_answer'] = 'Người trả lời';
 $lang_module['report_guest'] = 'Khách';

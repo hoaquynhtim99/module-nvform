@@ -27,7 +27,7 @@ foreach ($question_info as $row) {
         $xtpl->parse('main.loop.required');
     }
     if ($row['question_type'] == 'textbox' or $row['question_type'] == 'number') {
-        if ($answer_info and !$row['user_editable'] and isset($form_info['filled'])) {
+        if ($answer_info and !$row['user_editable'] and !empty($form_info['filled'])) {
             $row['readonly'] = 'readonly="readonly"';
         }
         $xtpl->assign('QUESTION', $row);
@@ -39,7 +39,7 @@ foreach ($question_info as $row) {
             $row['value'] = NV_CURRENTTIME;
         }
         $row['value'] = (empty($row['value'])) ? '' : date('d/m/Y', $row['value']);
-        $row['datepicker'] = ($answer_info and !$row['user_editable'] and isset($form_info['filled'])) ? '' : 'datepicker';
+        $row['datepicker'] = ($answer_info and !$row['user_editable'] and !empty($form_info['filled'])) ? '' : 'datepicker';
         $xtpl->assign('QUESTION', $row);
         $xtpl->parse('main.loop.date');
     } elseif ($row['question_type'] == 'time') {
@@ -49,7 +49,7 @@ foreach ($question_info as $row) {
         $xtpl->assign('QUESTION', $row);
         $xtpl->parse('main.loop.time');
     } elseif ($row['question_type'] == 'textarea') {
-        if ($answer_info and !$row['user_editable'] and isset($form_info['filled'])) {
+        if ($answer_info and !$row['user_editable'] and !empty($form_info['filled'])) {
             $row['readonly'] = 'readonly';
         }
         $row['value'] = nv_htmlspecialchars(nv_br2nl($row['value']));
@@ -106,7 +106,7 @@ foreach ($question_info as $row) {
 
             if (isset($row['question_choices_extend'][$key])) {
                 $number = 0;
-                if ($answer_info and !$row['user_editable'] and isset($form_info['filled'])) {
+                if ($answer_info and !$row['user_editable'] and !empty($form_info['filled'])) {
                     $readonly = 'readonly="readonly"';
                 }
                 foreach ($row['question_choices_extend'][$key] as $key => $value) {
@@ -123,7 +123,7 @@ foreach ($question_info as $row) {
             }
         }
 
-        if ($answer_info and !$row['user_editable'] and isset($form_info['filled'])) {
+        if ($answer_info and !$row['user_editable'] and !empty($form_info['filled'])) {
             $row['readonly'] = 'readonly="readonly"';
         }
         $xtpl->assign('QUESTION', $row);
@@ -137,7 +137,7 @@ foreach ($question_info as $row) {
         foreach ($row['question_choices'] as $key => $value) {
             $readonly = '';
             $row['readonly'] = '';
-            if ($answer_info and !$row['user_editable'] and isset($form_info['filled'])) {
+            if ($answer_info and !$row['user_editable'] and !empty($form_info['filled'])) {
                 $row['readonly'] = 'onclick="return false;"';
                 $readonly = 'readonly="readonly"';
             }
@@ -169,7 +169,7 @@ foreach ($question_info as $row) {
         }
     } elseif ($row['question_type'] == 'checkbox') {
         $row['readonly'] = '';
-        if ($answer_info and !$row['user_editable'] and isset($form_info['filled'])) {
+        if ($answer_info and !$row['user_editable'] and !empty($form_info['filled'])) {
             $row['readonly'] = 'onclick="return false;"';
         }
 
@@ -198,7 +198,7 @@ foreach ($question_info as $row) {
             $xtpl->parse('main.loop.multiselect.loop');
         }
 
-        if ($answer_info and !$row['user_editable'] and isset($form_info['filled'])) {
+        if ($answer_info and !$row['user_editable'] and !empty($form_info['filled'])) {
             $row['readonly'] = 'readonly="readonly"';
         }
 

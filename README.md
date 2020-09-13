@@ -14,17 +14,12 @@ Xem [LICENSE](LICENSE) để biết thêm thông tin.
 
 ## Sử dụng chức năng xuất báo cáo ra file
 
-Để sử dụng chức năng này, cần cài đặt thư viện PHPExcel và mPDF, bằng một trong hai cách dưới đây
-### Cài đặt qua composer (khuyến khích sử dụng)
-(Hãy bỏ qua phương án này nếu bạn không hiểu composer là gì)
+Để sử dụng chức năng này, cần cài đặt thư viện PHPExcel và mPDF bằng composer
+
 ```
-composer require phpoffice/phpexcel
-composer require mpdf/mpdf
+composer require phpoffice/phpspreadsheet
+composer require phpoffice/phpword
 ```
-### Cài đặt từ mã nguồn
-- Tải về phiên bản mới nhất của PHPExcel tại https://github.com/PHPOffice/PHPExcel/releases
-- Giải nén, copy thư mục `Classes` vào thư mục `includes` (của NukeViet)
-- Đổi tên thư mục `Classes` vừa copy sang thành `class`
 
 ## Tài trợ
 

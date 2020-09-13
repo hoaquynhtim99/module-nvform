@@ -39,6 +39,7 @@ $sql_create_module[] = "CREATE TABLE " . $db_config['prefix'] . "_" . $lang . "_
   weight smallint(4) NOT NULL DEFAULT '0',
   add_time int(11) NOT NULL DEFAULT '0',
   status tinyint(1) unsigned NOT NULL DEFAULT '0',
+  export_handler varchar(100) NOT NULL DEFAULT '' COMMENT 'Trình xử lý xuất kết quả ngoài site',
   PRIMARY KEY (id),
   UNIQUE KEY alias (alias)
 ) ENGINE=MyISAM";
@@ -52,7 +53,14 @@ $sql_create_module[] = "CREATE TABLE " . $db_config['prefix'] . "_" . $lang . "_
   who_answer tinyint(2) NOT NULL DEFAULT '0',
   answer_time int(11) NOT NULL DEFAULT '0',
   answer_edit_time int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (id)
+  answer_ip varchar(45) NOT NULL DEFAULT '' COMMENT 'IP đã trả lời',
+  answer_agent varchar(255) NOT NULL DEFAULT '' COMMENT 'Trình duyệt trả lời',
+  secret_code varchar(32) NOT NULL DEFAULT '' COMMENT 'Mã bí mật',
+  answer_code varchar(32) NOT NULL DEFAULT '' COMMENT 'Khóa lấy câu trả lời',
+  PRIMARY KEY (id),
+  KEY answer_ip (answer_ip),
+  KEY secret_code (secret_code),
+  KEY answer_code (answer_code)
 ) ENGINE=MyISAM";
 
 // Bảng câu hỏi

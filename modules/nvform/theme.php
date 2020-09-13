@@ -128,6 +128,11 @@ function nv_theme_nvform_viewform($form_info, $question_info, $answer_info, $ans
         $xtpl->parse('main.info');
     }
 
+    // Xuất kết quả
+    if (!empty($form_info['filled']) and class_exists('PhpOffice\PhpWord\PhpWord')) {
+        $xtpl->parse('main.export_result');
+    }
+
     $xtpl->parse('main');
     return $xtpl->text('main');
 }

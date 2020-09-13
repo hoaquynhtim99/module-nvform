@@ -6,6 +6,8 @@
  * @Createdate Tue, 08 Apr 2014 15:13:43 GMT
  */
 
+var nv_timer;
+
 function get_alias(id) {
     var title = strip_tags(document.getElementById('idtitle').value);
     if (title != '') {
@@ -21,7 +23,7 @@ function get_alias(id) {
 }
 
 function nv_chang_weight(vid, fid, op) {
-    var nv_timer = nv_settimeout_disable('change_weight_' + vid, 5000);
+    nv_timer = nv_settimeout_disable('change_weight_' + vid, 5000);
     var new_weight = $('#change_weight_' + vid).val();
     $.post(script_name + '?' + nv_name_variable + '=' + nv_module_name + '&' + nv_fc_variable + '=change_weight&nocache=' + new Date().getTime(), 'id=' + vid + '&op=' + op + '&fid=' + fid + '&new_weight=' + new_weight, function(res) {
         nv_chang_weight_res(res);
@@ -30,7 +32,7 @@ function nv_chang_weight(vid, fid, op) {
 }
 
 function nv_chang_status(vid, op) {
-    var nv_timer = nv_settimeout_disable('change_status_' + vid, 5000);
+    nv_timer = nv_settimeout_disable('change_status_' + vid, 5000);
     var new_status = $('#change_status_' + vid).val();
     $.post(script_name + '?' + nv_name_variable + '=' + nv_module_name + '&' + nv_fc_variable + '=change_status&nocache=' + new Date().getTime(), 'id=' + vid + '&op=' + op + '&new_status=' + new_status, function(res) {
         nv_chang_weight_res(res);
@@ -89,7 +91,7 @@ function nv_del_answer(aid) {
 }
 
 $( document ).ready(function() {
-    $('#frm-download').submit(function(res){
+    $('#frm-download').submit(function(){
         var type= $('input[name="type"]:checked').val();
         var is_zip= $('input[name="zip"]').is(':checked') ? 1 : 0;
         var fid = $('#fid').val();
@@ -115,6 +117,31 @@ $( document ).ready(function() {
             }
         });
     });
+
+    // Tooltip khi ấn vào
+    // Tắt tooltip khi click sang chỗ khác
+    $(document).on('click', function(e) {
+        $target = $(e.target);
+        if ($target.is('[data-toggle="rps-c-tip"]')) {
+            e.preventDefault();
+            if (!$target.data('bs.tooltip')) {
+                $target.tooltip({
+                    animation: false,
+                    container: 'body',
+                    placement: 'auto',
+                    trigger: 'manual'
+                });
+            }
+            if ($target.attr('aria-describedby')) {
+                $target.tooltip('hide');
+            } else {
+                $target.tooltip('show');
+            }
+            return true;
+        }
+        $('[data-toggle="rps-c-tip"]').tooltip('hide');
+    });
+
 });
 
 function nv_open_windown( url )

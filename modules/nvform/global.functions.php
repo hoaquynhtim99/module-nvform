@@ -12,6 +12,19 @@ if (!defined('NV_MAINFILE')) {
     die('Stop!!!');
 }
 
+/**
+ * @param string $text
+ * @return mixed
+ */
+function standardizeLineBreaks($text)
+{
+    $text = str_replace("\025", "\n", $text); // IBM mainframe systems
+    $text = str_replace("\n\r", "\n", $text); // Acorn BBC
+    $text = str_replace("\r\n", "\n", $text); // Microsoft Windows
+    $text = str_replace("\r", "\n", $text); // Mac OS,
+    return $text;
+}
+
 function nv_form_result($question_data, $answer_data, $is_admin = 0)
 {
     global $lang_module, $global_config, $module_info, $module_name, $module_data, $module_file, $user_info;

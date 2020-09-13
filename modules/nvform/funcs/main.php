@@ -38,9 +38,11 @@ while ($row = $_query->fetch()) {
         $array_data[$row['id']] = $row;
     }
 }
+if ($page > 1 and empty($array_data)) {
+    nv_redirect_location(NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&' . NV_NAME_VARIABLE . '=' . $module_name, true);
+}
 
 $nv_alias_page = nv_alias_page($page_title, $base_url, $all_page, $per_page, $page);
-
 $contents = nv_theme_nvform_main($array_data, $nv_alias_page);
 
 include NV_ROOTDIR . '/includes/header.php';
