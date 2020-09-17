@@ -308,6 +308,10 @@ foreach ($question_info as $row) {
         $xtpl->parse('main.loop.display_left_div');
     } elseif ($form_info['question_display'] == 'question_display_two_column') {
         $xtpl->parse('main.loop.display_two_column');
+
+        if ($i % 2 == 0) {
+            $xtpl->parse('main.loop.display_two_column2');
+        }
     }
 
     if ($row['break']) {
