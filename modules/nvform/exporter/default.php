@@ -97,7 +97,7 @@ foreach ($question_info as $row) {
     $cellTitle = $table->addCell(Converter::cmToTwip(6), $tableCellStyle);
     $cellData = $table->addCell(Converter::cmToTwip(10), $tableCellStyle);
 
-    $title = standardizeLineBreaks(htmlspecialchars(strip_tags($row['title'])));
+    $title = standardizeLineBreaks(htmlspecialchars(html_entity_decode(strip_tags($row['title']))));
     $title = preg_replace("/\n/iu", ' ', $title);
     $title = preg_replace("/\s[\s]+/iu", ' ', $title);
 
@@ -110,11 +110,11 @@ foreach ($question_info as $row) {
     } elseif ($row['question_type'] == 'time') {
         $row['value'] = (empty($row['value'])) ? '' : date('H:i', $row['value']);
     } elseif ($row['question_type'] == 'textarea' or $row['question_type'] == 'editor') {
-        $row['value'] = standardizeLineBreaks(htmlspecialchars(strip_tags($row['value'])));
+        $row['value'] = standardizeLineBreaks(htmlspecialchars(html_entity_decode(strip_tags($row['value']))));
         $row['value'] = preg_replace("/\n/iu", ' ', $row['value']);
         $row['value'] = preg_replace("/\s[\s]+/iu", ' ', $row['value']);
     } else {
-        $row['value'] = htmlspecialchars($row['value']);
+        $row['value'] = htmlspecialchars(html_entity_decode($row['value']));
     }
 
     $cellData->addText($row['value'], $fontNormal, $paragraphTableStyle);
