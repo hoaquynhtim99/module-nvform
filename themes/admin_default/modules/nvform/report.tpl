@@ -1,29 +1,34 @@
 <!-- BEGIN: main -->
+<link type="text/css" href="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/jquery-ui/jquery-ui.min.css" rel="stylesheet">
+<script type="text/javascript" src="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/jquery-ui/jquery-ui.min.js"></script>
+<script type="text/javascript" src="{NV_BASE_SITEURL}{NV_ASSETS_DIR}/js/language/jquery.ui.datepicker-{NV_LANG_INTERFACE}.js"></script>
 <div class="row">
     <div class="col-xs-24 col-sm-24 col-md-16">
-        <form class="form-inline" action="{FORM_ACTION}" method="get">
+        <form class="form-inline form-search-report" action="{FORM_ACTION}" method="get">
             <input type="hidden" name="{NV_LANG_VARIABLE}" value="{NV_LANG_DATA}">
             <input type="hidden" name="{NV_NAME_VARIABLE}" value="{MODULE_NAME}">
             <input type="hidden" name="{NV_OP_VARIABLE}" value="{OP}">
             <input type="hidden" name="fid" value="{FID}">
+            <!--
             <div class="form-group">
                 <select class="form-control" name="field">
                     <option value="">{LANG.report_all_field}</option>
                     <!-- BEGIN: field -->
-                    <option value="">sss</option>
+                    <option value="{FIELD.title}"{FIELD.selected}>{FIELD.title}</option>
                     <!-- END: field -->
                 </select>
             </div>
             <div class="form-group">
                 <input type="text" class="form-control" name="q" value="{SEARCH.q}" placeholder="{GLANG.search}">
             </div>
+            -->
             <div class="form-group">
                 <label>{LANG.form_start_time}:</label>
-                <input type="text" class="form-control w100" name="f" value="{SEARCH.from}">
+                <input type="text" class="form-control w100 dtpicket" name="f" value="{SEARCH.from}" placeholder="dd/mm/yyyy" autocomplete="off">
             </div>
             <div class="form-group">
                 <label>{LANG.form_end_time}:</label>
-                <input type="text" class="form-control w100" name="t" value="{SEARCH.to}">
+                <input type="text" class="form-control w100 dtpicket" name="t" value="{SEARCH.to}" placeholder="dd/mm/yyyy" autocomplete="off">
             </div>
             <div class="form-group">
                 <button type="submit" class="btn btn-primary">{GLANG.search}</button>
@@ -86,4 +91,18 @@
         </tbody>
     </table>
 </div>
+<script type="text/javascript">
+$(document).ready(function() {
+    $('.dtpicket').datepicker({
+        showOn : "both",
+        dateFormat : "dd-mm-yy",
+        changeMonth : true,
+        changeYear : true,
+        showOtherMonths : true,
+        buttonImage : null,
+        buttonText : null,
+        buttonImageOnly : false
+    });
+});
+</script>
 <!-- END: main -->

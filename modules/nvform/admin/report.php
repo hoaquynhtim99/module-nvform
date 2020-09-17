@@ -58,15 +58,14 @@ $xtpl->assign('NV_OP_VARIABLE', NV_OP_VARIABLE);
 $xtpl->assign('MODULE_NAME', $module_name);
 $xtpl->assign('OP', $op);
 $xtpl->assign('FID', $fid);
+$xtpl->assign('NV_ASSETS_DIR', NV_ASSETS_DIR);
+$xtpl->assign('NV_LANG_INTERFACE', NV_LANG_INTERFACE);
 
-$sql = 'SELECT t1.*, t2.username, t2.last_name, t2.first_name FROM ' . NV_PREFIXLANG . '_' . $module_data . '_answer t1
-LEFT JOIN ' . NV_USERS_GLOBALTABLE . ' t2 ON t1.who_answer = t2.userid WHERE fid = ' . $fid;
-$result = $db->query($sql);
-$answer_data = $result->fetchAll();
-
+// Lấy danh sách câu hỏi
 $sql = 'SELECT * FROM ' . NV_PREFIXLANG . '_' . $module_data . '_question WHERE fid = ' . $fid . ' AND status=1 ORDER BY weight';
 $result = $db->query($sql);
 
+$array_fields = [];
 while ($row = $result->fetch()) {
     if ($row['report']) {
         $row['title'] = nv_get_plaintext($row['title']);
@@ -76,6 +75,34 @@ while ($row = $result->fetch()) {
         $xtpl->parse('main.thead');
     }
 }
+
+$array_search = [];
+$array_search['field'] = $nv_Request->get_title('field', 'get', '');
+$array_search['q'] = $nv_Request->get_title('q', 'get', '');
+$array_search['from'] = $nv_Request->get_string('f', 'get', '');
+$array_search['to'] = $nv_Request->get_string('t', 'get', '');
+
+$xtpl->assign('SEARCH', $array_search);
+
+$where = [];
+if (preg_match('/^([0-9]{2})\-([0-9]{2})\-([0-9]{4})$/', $array_search['from'], $m)) {
+    $where[] = 't1.answer_time>=' . mktime(0, 0, 0, intval($m[2]), intval($m[1]), intval($m[3]));
+} else {
+    $array_search['from'] = '';
+}
+if (preg_match('/^([0-9]{2})\-([0-9]{2})\-([0-9]{4})$/', $array_search['to'], $m)) {
+    $where[] = 't1.answer_time<=' . mktime(23, 59, 59, intval($m[2]), intval($m[1]), intval($m[3]));
+} else {
+    $array_search['to'] = '';
+}
+
+$sql = 'SELECT t1.*, t2.username, t2.last_name, t2.first_name FROM ' . NV_PREFIXLANG . '_' . $module_data . '_answer t1
+LEFT JOIN ' . NV_USERS_GLOBALTABLE . ' t2 ON t1.who_answer = t2.userid WHERE fid = ' . $fid;
+if (!empty($where)) {
+    $sql .= ' AND ' . implode(' AND ', $where);
+}
+$result = $db->query($sql);
+$answer_data = $result->fetchAll();
 
 $i = 1;
 foreach ($answer_data as $answer) {

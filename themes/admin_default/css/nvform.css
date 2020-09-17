@@ -11,3 +11,7 @@ table.table-middle td span.help-block, table.table-middle td span.help-block ul 
     margin-bottom: 0;
     font-size: 12px
 }
+
+.form-search-report .ui-datepicker-trigger {
+    display: none;
+}
