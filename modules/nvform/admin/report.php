@@ -87,12 +87,15 @@ foreach ($answer_data as $answer) {
             $question_type = $question_data[$qid]['question_type'];
             if ($question_type == 'multiselect' or $question_type == 'select' or $question_type == 'radio' or $question_type == 'checkbox') {
                 $data = unserialize($question_data[$qid]['question_choices']);
+
                 if ($question_type == 'checkbox') {
                     $result = explode(',', $ans);
                     foreach ($result as $key) {
-                        $answer_info .= $data[$key] . "<br />";
+                        if (isset($data[$key])) {
+                            $answer_info .= $data[$key] . "<br />";
+                        }
                     }
-                } else {
+                } elseif (isset($data[$ans])) {
                     $answer_info = $data[$ans];
                 }
             } elseif ($question_type == 'date' and !empty($ans)) {
