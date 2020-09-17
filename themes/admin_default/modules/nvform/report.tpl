@@ -39,7 +39,7 @@
         <div class="form-group text-right">
             <a href="{URL_ANALYTICS}" target="_blank" class="btn btn-danger"><i class="fa fa-area-chart"></i> {LANG.report_chart}</a>
             <div class="btn-group">
-                <button id="open_modal" data-fid="{FID}" class="btn btn-primary" data-lang_ex="{LANG.report_ex}">
+                <button id="open_modal" data-fid="{FID}" data-sql="{SQL}" class="btn btn-primary" data-lang_ex="{LANG.report_ex}">
                     <em class="fa fa-floppy-o">&nbsp;</em>{LANG.report_ex}
                 </button>
                 <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

@@ -82,8 +82,6 @@ $array_search['q'] = $nv_Request->get_title('q', 'get', '');
 $array_search['from'] = $nv_Request->get_string('f', 'get', '');
 $array_search['to'] = $nv_Request->get_string('t', 'get', '');
 
-$xtpl->assign('SEARCH', $array_search);
-
 $where = [];
 if (preg_match('/^([0-9]{2})\-([0-9]{2})\-([0-9]{4})$/', $array_search['from'], $m)) {
     $where[] = 't1.answer_time>=' . mktime(0, 0, 0, intval($m[2]), intval($m[1]), intval($m[3]));
@@ -103,6 +101,9 @@ if (!empty($where)) {
 }
 $result = $db->query($sql);
 $answer_data = $result->fetchAll();
+
+$xtpl->assign('SEARCH', $array_search);
+$xtpl->assign('SQL', empty($where) ? '' : $crypt->encrypt(implode(' AND ', $where)));
 
 $i = 1;
 foreach ($answer_data as $answer) {

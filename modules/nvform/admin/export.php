@@ -12,15 +12,9 @@ if (!defined('NV_IS_FILE_ADMIN')) {
     die('Stop!!!');
 }
 
-if (!class_exists('PHPExcel')) {
-    if (file_exists(NV_ROOTDIR . '/includes/class/PHPExcel.php')) {
-        require_once NV_ROOTDIR . '/includes/class/PHPExcel.php';
-    } else {
-        $contents = nv_theme_alert($lang_module['report_required_phpexcel_title'], $lang_module['report_required_phpexcel_content'], 'danger');
-        include NV_ROOTDIR . '/includes/header.php';
-        echo nv_admin_theme($contents);
-        include NV_ROOTDIR . '/includes/footer.php';
-    }
+if (!class_exists('PhpOffice\PhpSpreadsheet\IOFactory')) {
+    $contents = nv_theme_alert($lang_module['report_required_phpexcel_title'], $lang_module['report_required_phpexcel_content'], 'danger');
+    nv_htmlOutput($contents);
 }
 
 $fid = $nv_Request->get_int('fid', 'get,post', 0);
@@ -31,8 +25,9 @@ if ($nv_Request->isset_request('export', 'post, get')) {
     $type = $nv_Request->get_title('type', 'get, post', '');
     $is_zip = $nv_Request->get_int('is_zip', 'get, post', 0);
 
-    if (empty($type))
+    if (empty($type)) {
         die('NO');
+    }
 
     $question_data = array();
     $result = $db->query('SELECT * FROM ' . NV_PREFIXLANG . '_' . $module_data . '_question WHERE fid = ' . $fid);
