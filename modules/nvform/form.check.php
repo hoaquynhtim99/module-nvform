@@ -12,6 +12,8 @@ if (!defined('NV_MAINFILE')) {
     die('Stop!!!');
 }
 
+use NukeViet\Files\Upload;
+
 foreach ($question_info as $row_f) {
     $old_value = '';
     $value = (isset($answer_info[$row_f['qid']])) ? $answer_info[$row_f['qid']] : '';
@@ -29,7 +31,7 @@ foreach ($question_info as $row_f) {
                 if (!file_exists(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $folder)) {
                     nv_mkdir(NV_UPLOADS_REAL_DIR . '/' . $module_upload, $folder);
                 }
-                $upload = new upload(explode(',', $question_choices['type']), $question_choices['ext'], $global_config['forbid_mimes'], $row_f['max_length'], NV_MAX_WIDTH, NV_MAX_HEIGHT);
+                $upload = new Upload(explode(',', $question_choices['type']), $question_choices['ext'], $global_config['forbid_mimes'], $row_f['max_length'], NV_MAX_WIDTH, NV_MAX_HEIGHT);
                 $upload_info = $upload->save_file($input_file, NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $folder, false);
 
                 @unlink($input_file['tmp_name']);

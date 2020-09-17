@@ -104,6 +104,7 @@ $lang_module['report_download'] = "Tải về";
 $lang_module['report_viewtable'] = "Xem bảng";
 $lang_module['report_viewpage'] = "Xem câu trả lời của người này";
 $lang_module['report_print'] = "In trang";
+$lang_module['report_all_field'] = "Tất cả";
 
 $lang_module['question'] = 'Câu hỏi';
 $lang_module['question_list'] = 'Danh sách câu hỏi';
