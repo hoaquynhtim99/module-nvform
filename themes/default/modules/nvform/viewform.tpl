@@ -29,7 +29,7 @@
     <!-- BEGIN: loop -->
     <div class="question_row<!-- BEGIN: display_two_column --> col-xs-24 col-sm-12 col-md-12<!-- END: display_two_column -->" data-page="{PAGE}">
         <div class="form-group">
-            <label<!-- BEGIN: display_left_label --> class="col-xs-24 col-sm-6 col-md-6 control-label"<!-- END: display_left_label -->>{QUESTION.title}<!-- BEGIN: required --><span class="text-danger"> (*)</span><!-- END: required --></label>
+            <label<!-- BEGIN: display_left_label --> class="col-xs-24 col-sm-6 col-md-6 control-label"<!-- END: display_left_label -->>{QUESTION_STT}. {QUESTION.title}<!-- BEGIN: required --><span class="text-danger"> (*)</span><!-- END: required --></label>
             <div<!-- BEGIN: display_left_div --> class="col-xs-24 col-sm-18 col-md-18"<!-- END: display_left_div -->>
                 <!-- BEGIN: textbox -->
                 <input class="{QUESTION.required} form-control" type="text" name="question[{QUESTION.qid}]" value="{QUESTION.value}" {QUESTION.readonly} />

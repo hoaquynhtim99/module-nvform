@@ -318,6 +318,7 @@ foreach ($question_info as $row) {
         $page++;
         $break++;
     }
+    $xtpl->assign('QUESTION_STT', number_format($i, 0, ',', '.'));
     $xtpl->assign('PAGE', $page);
 
     $xtpl->parse('main.loop');
