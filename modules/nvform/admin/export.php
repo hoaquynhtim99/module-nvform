@@ -12,6 +12,15 @@ if (!defined('NV_IS_FILE_ADMIN')) {
     die('Stop!!!');
 }
 
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use NukeViet\Files\Download;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+
 if (!class_exists('PhpOffice\PhpSpreadsheet\IOFactory')) {
     $contents = nv_theme_alert($lang_module['report_required_phpexcel_title'], $lang_module['report_required_phpexcel_content'], 'danger');
     nv_htmlOutput($contents);
@@ -29,51 +38,45 @@ if ($nv_Request->isset_request('export', 'post, get')) {
         die('NO');
     }
 
-    $question_data = array();
-    $result = $db->query('SELECT * FROM ' . NV_PREFIXLANG . '_' . $module_data . '_question WHERE fid = ' . $fid);
+    $question_data = [];
+    $result = $db->query('SELECT * FROM ' . NV_PREFIXLANG . '_' . $module_data . '_question WHERE fid = ' . $fid . ' ORDER BY weight ASC');
     while ($row = $result->fetch()) {
         $question_data[$row['qid']] = $row;
     }
 
-    $answer_data = array();
-    $result = $db->query('SELECT t1.*, t2.username FROM ' . NV_PREFIXLANG . '_' . $module_data . '_answer t1 LEFT JOIN ' . NV_USERS_GLOBALTABLE . ' t2 ON t1.who_answer = t2.userid WHERE fid = ' . $fid);
+    $answer_data = [];
+    $result = $db->query('SELECT t1.*, t2.username, t2.first_name, t2.last_name FROM ' . NV_PREFIXLANG . '_' . $module_data . '_answer t1 LEFT JOIN ' . NV_USERS_GLOBALTABLE . ' t2 ON t1.who_answer = t2.userid WHERE fid = ' . $fid);
     while ($row = $result->fetch()) {
         $answer_data[] = $row;
     }
 
-    if ($type == 'pdf') {
-        $rendererName = PHPExcel_Settings::PDF_RENDERER_MPDF;
-        $rendererLibrary = 'mpdf/mpdf';
-        $rendererLibraryPath = NV_ROOTDIR . '/vendor/' . $rendererLibrary;
-    }
-
-    $array = array(
+    $array = [
         'objType' => '',
         'objExt' => ''
-    );
+    ];
     switch ($type) {
         case 'xlsx':
-            $array['objType'] = 'Excel2007';
+            $array['objType'] = 'Xlsx';
             $array['objExt'] = 'xlsx';
             break;
         case 'ods':
-            $array['objType'] = 'OpenDocument';
+            $array['objType'] = 'Ods';
             $array['objExt'] = 'ods';
             break;
         case 'pdf':
-            $array['objType'] = 'PDF';
+            $array['objType'] = 'Mpdf';
             $array['objExt'] = 'pdf';
             break;
         default:
-            $array['objType'] = 'CSV';
+            $array['objType'] = 'Csv';
             $array['objExt'] = 'csv';
     }
 
-    $objPHPExcel = new PHPExcel();
-    $objPHPExcel->setActiveSheetIndex(0);
+    $spreadsheet = new Spreadsheet();
+    $spreadsheet->setActiveSheetIndex(0);
 
     // Set properties
-    $objPHPExcel->getProperties()
+    $spreadsheet->getProperties()
         ->setCreator($admin_info['username'])
         ->setLastModifiedBy($admin_info['username'])
         ->setTitle($form_info['title'])
@@ -81,21 +84,21 @@ if ($nv_Request->isset_request('export', 'post, get')) {
         ->setDescription($form_info['title'])
         ->setCategory($module_name);
 
-    $columnIndex = 4; // Cot bat dau ghi du lieu
+    $columnIndex = 5; // Cot bat dau ghi du lieu
     $rowIndex = 3; // Dong bat dau ghi du lieu
 
-    // Tieu de cot
-    $objPHPExcel->getActiveSheet()
-        ->setCellValue(PHPExcel_Cell::stringFromColumnIndex(0) . $rowIndex, $lang_module['question_number'])
-        ->setCellValue(PHPExcel_Cell::stringFromColumnIndex(1) . $rowIndex, $lang_module['report_who_answer'])
-        ->setCellValue(PHPExcel_Cell::stringFromColumnIndex(2) . $rowIndex, $lang_module['report_answer_time'])
-        ->setCellValue(PHPExcel_Cell::stringFromColumnIndex(3) . $rowIndex, $lang_module['report_answer_edit_time']);
+    // Định tiêu đề cột cố định
+    $spreadsheet->getActiveSheet()
+        ->setCellValue(Coordinate::stringFromColumnIndex(1) . $rowIndex, $lang_module['question_number'])
+        ->setCellValue(Coordinate::stringFromColumnIndex(2) . $rowIndex, $lang_module['report_who_answer'])
+        ->setCellValue(Coordinate::stringFromColumnIndex(3) . $rowIndex, $lang_module['report_answer_time'])
+        ->setCellValue(Coordinate::stringFromColumnIndex(4) . $rowIndex, $lang_module['report_answer_edit_time']);
 
-    // Tieu de cot cau hoi
+    // Định tiêu đề cột của các câu hỏi
     $_columnIndex = $columnIndex;
     foreach ($question_data as $question) {
-        $TextColumnIndex = PHPExcel_Cell::stringFromColumnIndex($_columnIndex);
-        $objPHPExcel->getActiveSheet()->setCellValue($TextColumnIndex . $rowIndex, nv_get_plaintext($question['title']));
+        $TextColumnIndex = Coordinate::stringFromColumnIndex($_columnIndex);
+        $spreadsheet->getActiveSheet()->setCellValue($TextColumnIndex . $rowIndex, nv_get_plaintext($question['title']));
         $_columnIndex++;
     }
 
@@ -104,25 +107,25 @@ if ($nv_Request->isset_request('export', 'post, get')) {
     $number = 1;
     foreach ($answer_data as $answer) {
         $j = $columnIndex;
-        $answer['username'] = !$answer['username'] ? $lang_module['report_guest'] : $answer['username'];
+        $answer['username'] = !$answer['username'] ? $lang_module['report_guest'] : nv_show_name_user($answer['first_name'], $answer['last_name'], $answer['username']);
         $answer['answer_time'] = nv_date('d/m/Y H:i', $answer['answer_time']);
         $answer['answer_edit_time'] = !$answer['answer_edit_time'] ? 'N/A' : nv_date('d/m/Y H:i', $answer['answer_edit_time']);
 
-        $col = PHPExcel_Cell::stringFromColumnIndex(0);
+        $col = Coordinate::stringFromColumnIndex(1);
         $CellValue = $number;
-        $objPHPExcel->getActiveSheet()->setCellValue($col . $i, $CellValue);
+        $spreadsheet->getActiveSheet()->setCellValue($col . $i, $CellValue);
 
-        $col = PHPExcel_Cell::stringFromColumnIndex(1);
+        $col = Coordinate::stringFromColumnIndex(2);
         $CellValue = nv_unhtmlspecialchars($answer['username']);
-        $objPHPExcel->getActiveSheet()->setCellValue($col . $i, $CellValue);
+        $spreadsheet->getActiveSheet()->setCellValue($col . $i, $CellValue);
 
-        $col = PHPExcel_Cell::stringFromColumnIndex(2);
+        $col = Coordinate::stringFromColumnIndex(3);
         $CellValue = nv_unhtmlspecialchars($answer['answer_time']);
-        $objPHPExcel->getActiveSheet()->setCellValue($col . $i, $CellValue);
+        $spreadsheet->getActiveSheet()->setCellValue($col . $i, $CellValue);
 
-        $col = PHPExcel_Cell::stringFromColumnIndex(3);
+        $col = Coordinate::stringFromColumnIndex(4);
         $CellValue = nv_unhtmlspecialchars($answer['answer_edit_time']);
-        $objPHPExcel->getActiveSheet()->setCellValue($col . $i, $CellValue);
+        $spreadsheet->getActiveSheet()->setCellValue($col . $i, $CellValue);
 
         $number++;
 
@@ -130,16 +133,22 @@ if ($nv_Request->isset_request('export', 'post, get')) {
         foreach ($answer['answer'] as $qid => $ans) {
             if (isset($question_data[$qid])) {
                 $question_type = $question_data[$qid]['question_type'];
+                $auto_datatype = true;
+
                 if ($question_type == 'multiselect' or $question_type == 'select' or $question_type == 'radio' or $question_type == 'checkbox') {
                     $data = unserialize($question_data[$qid]['question_choices']);
                     if ($question_type == 'checkbox') {
                         $result = explode(',', $ans);
                         $ans = '';
                         foreach ($result as $key) {
-                            $ans .= $data[$key] . "<br />";
+                            if (isset($data[$key])) {
+                                $ans .= $data[$key] . "\n";
+                            }
                         }
-                    } else {
+                    } elseif (isset($data[$ans])) {
                         $ans = $data[$ans];
+                    } else {
+                        $ans = '';
                     }
                 } elseif ($question_type == 'date' and !empty($ans)) {
                     $ans = nv_date('d/m/Y', $ans);
@@ -174,107 +183,104 @@ if ($nv_Request->isset_request('export', 'post, get')) {
                         }
                     }
                 } elseif ($question_type == 'file' and file_exists(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $ans)) {
-                    $ans = '<a href="' . NV_BASE_SITEURL . NV_UPLOADS_DIR . '/' . $module_upload . '/' . $ans . '" title="">' . $lang_module['question_options_file_dowload'] . '</a>';
+                    $ans = '';
+                } elseif ($question_type == 'table') {
+                    //
+                    $ans = '';
+                } else {
+                    $auto_datatype = true;
                 }
-
-                $answer['username'] = empty($answer['username']) ? $lang_module['report_guest'] : nv_show_name_user($answer['first_name'], $answer['last_name'], $answer['username']);
             } else {
                 $ans = '';
             }
-            $col = PHPExcel_Cell::stringFromColumnIndex($j);
-            $CellValue = htmlspecialchars(nv_editor_br2nl(($ans)));
-            $objPHPExcel->getActiveSheet()->setCellValue($col . $i, $CellValue);
+
+            $col = Coordinate::stringFromColumnIndex($j);
+            if ($auto_datatype) {
+                $spreadsheet->getActiveSheet()->setCellValue($col . $i, trim($ans));
+            } else {
+                $spreadsheet->getActiveSheet()->setCellValueExplicit($col . $i, trim($ans), DataType::TYPE_STRING);
+            }
             $j++;
         }
         $i++;
     }
 
     $highestRow = $i - 1;
-    $highestColumn = PHPExcel_Cell::stringFromColumnIndex($j - 1);
+    $highestColumn = Coordinate::stringFromColumnIndex($j - 1);
 
     // Rename sheet
-    $objPHPExcel->getActiveSheet()->setTitle('Sheet 1');
+    $spreadsheet->getActiveSheet()->setTitle('Sheet 1');
 
     // Set page orientation and size
-    $objPHPExcel->getActiveSheet()
+    $spreadsheet->getActiveSheet()
         ->getPageSetup()
-        ->setOrientation(PHPExcel_Worksheet_PageSetup::ORIENTATION_LANDSCAPE);
-    $objPHPExcel->getActiveSheet()
+        ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
+    $spreadsheet->getActiveSheet()
         ->getPageSetup()
-        ->setPaperSize(PHPExcel_Worksheet_PageSetup::PAPERSIZE_A4);
+        ->setPaperSize(PageSetup::PAPERSIZE_A4);
 
     // Excel title
-    $objPHPExcel->getActiveSheet()->mergeCells('A2:' . $highestColumn . '2');
-    $objPHPExcel->getActiveSheet()->setCellValue('A2', strtoupper($form_info['title']));
-    $objPHPExcel->getActiveSheet()
+    $spreadsheet->getActiveSheet()->mergeCells('A2:' . $highestColumn . '2');
+    $spreadsheet->getActiveSheet()->setCellValue('A2', nv_strtoupper($form_info['title']));
+    $spreadsheet->getActiveSheet()
         ->getStyle('A2')
         ->getAlignment()
-        ->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-    $objPHPExcel->getActiveSheet()
+        ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+    $spreadsheet->getActiveSheet()
         ->getStyle('A2')
         ->getAlignment()
-        ->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+        ->setVertical(Alignment::VERTICAL_CENTER);
 
-    // Set color
-    $styleArray = array(
-        'borders' => array(
-            'outline' => array(
-                'style' => PHPExcel_Style_Border::BORDER_THIN,
-                'color' => array(
-                    'argb' => 'FF000000'
-                )
-            )
-        )
-    );
-    $objPHPExcel->getActiveSheet()
-        ->getStyle('A3' . ':' . $highestColumn . $highestRow)
-        ->applyFromArray($styleArray);
-
-    // Set font size
-    $objPHPExcel->getActiveSheet()
+    // Định kích thước chữ
+    $spreadsheet->getActiveSheet()
         ->getStyle("A1:" . $highestColumn . $highestRow)
         ->getFont()
         ->setSize(12);
 
-    // Set auto column width
-    foreach (range('A', $highestColumn) as $columnID) {
-        $objPHPExcel->getActiveSheet()
-            ->getColumnDimension($columnID)
+    // Tự động căn độ rộng các cột
+    $numberCols = Coordinate::rangeDimension('A1:' . $highestColumn . '1')[0];
+    for ($i = 1; $i <= $numberCols; $i++) {
+        $spreadsheet->getActiveSheet()
+        ->getColumnDimension(Coordinate::stringFromColumnIndex($i))
             ->setAutoSize(true);
     }
 
-    $objPHPExcel->getActiveSheet()
+    // Kẻ viền xung quanh nội dung
+    $styleArray = [
+        'borders' => [
+            'outline' => [
+                'borderStyle' => Border::BORDER_THIN,
+                'color' => ['argb' => 'FF000000'],
+            ],
+        ],
+    ];
+    $spreadsheet->getActiveSheet()
         ->getStyle("A3:" . $highestColumn . $highestRow)
-        ->applyFromArray(array(
-        'borders' => array(
-            'allborders' => array(
-                'style' => PHPExcel_Style_Border::BORDER_THIN,
-                'color' => array(
-                    'rgb' => 'DDDDDD'
-                )
-            )
-        )
-    ));
+        ->applyFromArray($styleArray);
 
-    if ($type == 'pdf') {
-        if (!PHPExcel_Settings::setPdfRenderer($rendererName, $rendererLibraryPath)) {
-            die('NOTICE: Please set the $rendererName and $rendererLibraryPath values' . '<br />' . 'at the top of this script as appropriate for your directory structure');
-        }
-    }
+    $spreadsheet->getActiveSheet()
+        ->getStyle("A4:" . $highestColumn . $highestRow)
+        ->getAlignment()->setWrapText(true);
 
-    $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, $array['objType']);
+    // Cho in đậm các cột tiêu đề
+    $spreadsheet->getActiveSheet()
+        ->getStyle("A3:" . $highestColumn . '3')
+        ->getFont()->setBold(true);
+
+    $objWriter = IOFactory::createWriter($spreadsheet, $array['objType']);
     $file_src = NV_ROOTDIR . '/' . NV_TEMP_DIR . '/' . $form_info['alias'] . '.' . $array['objExt'];
     $objWriter->save($file_src);
 
-    if (!$download and file_exists($file_src))
+    if (!$download and file_exists($file_src)) {
         die('OK_' . str_replace(NV_ROOTDIR . NV_BASE_SITEURL, '', $file_src));
+    }
 
     if (!$is_zip) {
-        $download = new NukeViet\Files\Download($file_src, NV_ROOTDIR . '/' . NV_TEMP_DIR);
+        $download = new Download($file_src, NV_ROOTDIR . '/' . NV_TEMP_DIR);
         $download->download_file();
         die('OK');
     } else {
-        $arry_file_zip = array();
+        $arry_file_zip = [];
         if (file_exists($file_src)) {
             $arry_file_zip[] = $file_src;
         }
@@ -289,7 +295,7 @@ if ($nv_Request->isset_request('export', 'post, get')) {
         }
 
         // Download file
-        $download = new NukeViet\Files\Download($file_src, NV_ROOTDIR . "/" . NV_TEMP_DIR, $form_info['alias'] . ".zip");
+        $download = new Download($file_src, NV_ROOTDIR . "/" . NV_TEMP_DIR, $form_info['alias'] . ".zip");
         $download->download_file();
         exit();
     }
@@ -302,20 +308,20 @@ $xtpl->assign('OP', $op);
 $xtpl->assign('FID', $fid);
 
 $default = 'xlsx';
-$array_type = array(
+$array_type = [
     'xlsx' => 'Microsoft Excel (XLSX)',
     'csv' => 'Comma-separated values (CSV)',
     'ods' => 'LibreOffice Calc (ODS)',
     'pdf' => 'PDF'
-);
+];
 
 foreach ($array_type as $key => $value) {
     $ck = $key == $default ? 'checked="checked"' : '';
-    $xtpl->assign('TYPE', array(
+    $xtpl->assign('TYPE', [
         'key' => $key,
         'value' => $value,
         'checked' => $ck
-    ));
+    ]);
     $xtpl->parse('main.export.type');
 }
 $xtpl->parse('main.export');

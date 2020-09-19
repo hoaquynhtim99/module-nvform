@@ -14,11 +14,12 @@ Xem [LICENSE](LICENSE) để biết thêm thông tin.
 
 ## Sử dụng chức năng xuất báo cáo ra file
 
-Để sử dụng chức năng này, cần cài đặt thư viện PHPExcel và mPDF bằng composer
+Để sử dụng chức năng này, cần cài đặt thư viện PhpSpreadsheet, PhpWord và mPDF bằng composer
 
 ```
 composer require phpoffice/phpspreadsheet
 composer require phpoffice/phpword
+composer require mpdf/mpdf
 ```
 
 ## Tài trợ
