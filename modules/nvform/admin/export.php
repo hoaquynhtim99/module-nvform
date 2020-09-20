@@ -20,6 +20,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Helper\Html as HtmlHelper;
 
 if (!class_exists('PhpOffice\PhpSpreadsheet\IOFactory')) {
     $contents = nv_theme_alert($lang_module['report_required_phpexcel_title'], $lang_module['report_required_phpexcel_content'], 'danger');
@@ -94,13 +95,23 @@ if ($nv_Request->isset_request('export', 'post, get')) {
         ->setCellValue(Coordinate::stringFromColumnIndex(3) . $rowIndex, $lang_module['report_answer_time'])
         ->setCellValue(Coordinate::stringFromColumnIndex(4) . $rowIndex, $lang_module['report_answer_edit_time']);
 
+    // Chiều rộng cột cố định
+    $spreadsheet->getActiveSheet()->getColumnDimension(Coordinate::stringFromColumnIndex(1))->setWidth(getColumnWidthFromString($lang_module['question_number']));
+    $spreadsheet->getActiveSheet()->getColumnDimension(Coordinate::stringFromColumnIndex(2))->setWidth(getColumnWidthFromString($lang_module['report_who_answer']));
+    $spreadsheet->getActiveSheet()->getColumnDimension(Coordinate::stringFromColumnIndex(3))->setWidth(getColumnWidthFromString($lang_module['report_answer_time']));
+    $spreadsheet->getActiveSheet()->getColumnDimension(Coordinate::stringFromColumnIndex(4))->setWidth(getColumnWidthFromString($lang_module['report_answer_edit_time']));
+
     // Định tiêu đề cột của các câu hỏi
     $_columnIndex = $columnIndex;
     foreach ($question_data as $question) {
         $TextColumnIndex = Coordinate::stringFromColumnIndex($_columnIndex);
-        $spreadsheet->getActiveSheet()->setCellValue($TextColumnIndex . $rowIndex, nv_get_plaintext($question['title']));
+        $col_text = getExcelWordTrueText($question['title']);
+        $spreadsheet->getActiveSheet()->setCellValue($TextColumnIndex . $rowIndex, $col_text);
+        $spreadsheet->getActiveSheet()->getColumnDimension($TextColumnIndex)->setWidth(getColumnWidthFromString($col_text));
         $_columnIndex++;
     }
+
+    $wizard = new HtmlHelper();
 
     // Hien thi cau tra loi
     $i = $rowIndex + 1;
@@ -185,10 +196,65 @@ if ($nv_Request->isset_request('export', 'post, get')) {
                 } elseif ($question_type == 'file' and file_exists(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $ans)) {
                     $ans = '';
                 } elseif ($question_type == 'table') {
-                    //
-                    $ans = '';
+                    $html = '';
+                    $question_choices = unserialize($question_data[$qid]['question_choices']);
+
+                    if (!empty($question_choices['row']) and isset($question_choices['col']) and sizeof($question_choices['col']) > 0) {
+                        $num_cols = sizeof($question_choices['col']);
+                        if ($num_cols == 1) {
+                            /*
+                             * Một cột thì xuất dạng Dòng: Value cột đầu tiên
+                             */
+                            $line = 0;
+                            foreach ($question_choices['row'] as $_row) {
+                                $line++;
+                                if ($line > 1) {
+                                    $html .= '<br />';
+                                }
+
+                                $html .= getExcelWordTrueText($_row['value']) . ': ';
+
+                                foreach ($question_choices['col'] as $_col) {
+                                    $line_value = isset($ans[$_col['key']][$_row['key']]) ? $ans[$_col['key']][$_row['key']] : '';
+                                    $html .= getExcelWordTrueText($line_value);
+                                }
+                            }
+                        } elseif ($num_cols > 1) {
+                            /*
+                             * Nhiều cột thì xuất dạng
+                             * Row title:
+                             * Col title: Row - Col value
+                             */
+                            $line_col = 0;
+                            foreach ($question_choices['col'] as $_col) {
+                                $line_col++;
+                                if ($line_col > 1) {
+                                    $html .= '<br />';
+                                }
+                                $html .= '<strong>' . getExcelWordTrueText($_col['value']) . '</strong>';
+                                $html .= '<br />';
+
+                                $line_row = 0;
+                                foreach ($question_choices['row'] as $_row) {
+                                    $line_row++;
+                                    if ($line_row > 1) {
+                                        $html .= '<br />';
+                                    }
+                                    $html .= getExcelWordTrueText($_row['value']) . ': ';
+                                    $line_value = isset($ans[$_col['key']][$_row['key']]) ? $ans[$_col['key']][$_row['key']] : '';
+                                    $html .= getExcelWordTrueText($line_value);
+                                }
+                            }
+                        }
+                    }
+
+                    $ans = $wizard->toRichTextObject($html);;
                 } else {
-                    $auto_datatype = true;
+                    // Nếu không phải là số thì ép tất cả về string tránh trường hợp đánh công thức vào lỗi
+                    if (!is_numeric($ans)) {
+                        $auto_datatype = false;
+                        $ans = getExcelWordTrueText($ans);
+                    }
                 }
             } else {
                 $ans = '';
@@ -196,7 +262,7 @@ if ($nv_Request->isset_request('export', 'post, get')) {
 
             $col = Coordinate::stringFromColumnIndex($j);
             if ($auto_datatype) {
-                $spreadsheet->getActiveSheet()->setCellValue($col . $i, trim($ans));
+                $spreadsheet->getActiveSheet()->setCellValue($col . $i, is_object($ans) ? $ans : trim($ans));
             } else {
                 $spreadsheet->getActiveSheet()->setCellValueExplicit($col . $i, trim($ans), DataType::TYPE_STRING);
             }
@@ -238,12 +304,14 @@ if ($nv_Request->isset_request('export', 'post, get')) {
         ->setSize(12);
 
     // Tự động căn độ rộng các cột
+    /*
     $numberCols = Coordinate::rangeDimension('A1:' . $highestColumn . '1')[0];
     for ($i = 1; $i <= $numberCols; $i++) {
         $spreadsheet->getActiveSheet()
         ->getColumnDimension(Coordinate::stringFromColumnIndex($i))
             ->setAutoSize(true);
     }
+    */
 
     // Kẻ viền xung quanh nội dung
     $styleArray = [
@@ -258,8 +326,9 @@ if ($nv_Request->isset_request('export', 'post, get')) {
         ->getStyle("A3:" . $highestColumn . $highestRow)
         ->applyFromArray($styleArray);
 
+    // Cho tự động xuống dòng tất cả các ô
     $spreadsheet->getActiveSheet()
-        ->getStyle("A4:" . $highestColumn . $highestRow)
+        ->getStyle("A3:" . $highestColumn . $highestRow)
         ->getAlignment()->setWrapText(true);
 
     // Cho in đậm các cột tiêu đề

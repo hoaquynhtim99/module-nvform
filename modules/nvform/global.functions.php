@@ -13,6 +13,22 @@ if (!defined('NV_MAINFILE')) {
 }
 
 /**
+ * @param string $string
+ * @return number
+ */
+function getColumnWidthFromString($string)
+{
+    $chars = nv_strlen($string);
+    if ($chars < 5) {
+        return 5;
+    }
+    if ($chars > 42) {
+        return 50;
+    }
+    return $chars * 1.2;
+}
+
+/**
  * @param string $text
  * @return mixed
  */
@@ -204,4 +220,16 @@ function nv_get_plaintext($string, $keep_image = false, $keep_link = false)
 
     $string = str_replace('&nbsp;', ' ', strip_tags($string));
     return preg_replace('/[ ]+/', ' ', $string);
+}
+
+/**
+ * @param string $string
+ * @return string
+ */
+function getExcelWordTrueText($string = '')
+{
+    $string = standardizeLineBreaks(htmlspecialchars(html_entity_decode(strip_tags($string))));
+    $string = preg_replace("/\n/iu", ' ', $string);
+    $string = preg_replace("/\s[\s]+/iu", ' ', $string);
+    return $string;
 }
