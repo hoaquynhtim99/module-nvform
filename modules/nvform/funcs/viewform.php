@@ -57,7 +57,21 @@ $form_info['filled'] = false;
 $form_info['link'] = NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=' . $form_info['alias'] . '-' . $form_info['id'] . $global_config['rewrite_exturl'];
 $form_info['link_export'] = NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=' . $form_info['alias'] . '-' . $form_info['id'] . $global_config['rewrite_exturl'] . '&amp;export=1';
 
-if (defined('NV_IS_USER')) {
+$admin_access = $nv_Request->get_absint('admin_access', 'get', 0);
+if ($admin_access and defined('NV_IS_MODADMIN')) {
+    // Quản trị truy cập để tải về biểu mẫu
+    $sql = "SELECT * FROM " . NV_PREFIXLANG . '_' . $module_data . "_answer WHERE id=" . $admin_access;
+    $_rows = $db->query($sql)->fetch();
+    if ($_rows) {
+        $filled = true;
+        $form_info['filled'] = true;
+        $answer_info = unserialize($_rows['answer']);
+        $answer_info_extend = unserialize($_rows['answer_extend']);
+        $answer_id = $_rows['id'];
+    } else {
+        nv_redirect_location(NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name);
+    }
+} elseif (defined('NV_IS_USER')) {
     // Là thành viên thì lấy trực tiếp
     $sql = "SELECT * FROM " . NV_PREFIXLANG . '_' . $module_data . "_answer WHERE fid = " . $fid . " AND who_answer = " . $user_info['userid'];
     $_rows = $db->query($sql)->fetch();

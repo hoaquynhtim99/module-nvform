@@ -76,7 +76,13 @@
         <tbody>
             <!-- BEGIN: tr -->
             <tr>
-                <td class="danger text-center"><a href="javascript:void(0);" rel='tooltip' data-html="true" data-toggle="tooltip" data-placement="top" title="{GLANG.delete}" onclick="nv_del_answer({ANSWER.id});"><em class="fa fa-trash-o fa-lg">&nbsp;</em></a> <a href="#" rel='tooltip' data-html="true" data-toggle="tooltip" data-placement="top" title="{LANG.report_viewpage}" onclick="nv_open_windown('{ANSWER.answer_view_url}');"><em class="fa fa-search fa-lg">&nbsp;</em></a></td>
+                <td class="danger text-center">
+                    <a href="javascript:void(0);" rel='tooltip' data-html="true" data-toggle="tooltip" data-placement="top" title="{GLANG.delete}" onclick="nv_del_answer({ANSWER.id});"><i class="fa fa-trash-o fa-lg"></i></a>
+                    <a href="#" rel='tooltip' data-html="true" data-toggle="tooltip" data-placement="top" title="{LANG.report_viewpage}" onclick="nv_open_windown('{ANSWER.answer_view_url}');"><i class="fa fa-search fa-lg"></i></a>
+                    <!-- BEGIN: export -->
+                    <a href="{ANSWER.answer_export}" data-toggle="tooltip" data-placement="top" title="{LANG.report_export}"><i class="fa fa-download" aria-hidden="true"></i></a>
+                    <!-- END: export -->
+                </td>
                 <td class="success text-center">{ANSWER.no}</td>
                 <td class="success">{ANSWER.username}</td>
                 <td class="success">{ANSWER.answer_time}</td>

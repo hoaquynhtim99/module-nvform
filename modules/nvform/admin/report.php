@@ -185,9 +185,15 @@ foreach ($answer_data as $answer) {
     $answer['answer_time'] = nv_date('d/m/Y H:i', $answer['answer_time']);
     $answer['answer_edit_time'] = !$answer['answer_edit_time'] ? '<span class="label label-danger">N/A</span>' : nv_date('d/m/Y H:i', $answer['answer_edit_time']);
     $answer['answer_view_url'] = NV_BASE_ADMINURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=view_answer&id=' . $answer['id'];
+    $answer['answer_export'] = NV_BASE_SITEURL . 'index.php?' . NV_LANG_VARIABLE . '=' . NV_LANG_DATA . '&amp;' . NV_NAME_VARIABLE . '=' . $module_name . '&amp;' . NV_OP_VARIABLE . '=' . $form_info['alias'] . '-' . $form_info['id'] . $global_config['rewrite_exturl'] . '&amp;admin_access=' . $answer['id'] . '&amp;export=1';
 
     $answer['no'] = $i;
     $xtpl->assign('ANSWER', $answer);
+
+    if (class_exists('PhpOffice\PhpWord\PhpWord')) {
+        $xtpl->parse('main.tr.export');
+    }
+
     $xtpl->parse('main.tr');
     $i++;
 }
