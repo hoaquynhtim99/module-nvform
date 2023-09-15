@@ -28,6 +28,7 @@
 /tool
 /.github
 /README.md
+/api.php
 
 # Ignore fix module files and directories.
 !/modules/nvform
