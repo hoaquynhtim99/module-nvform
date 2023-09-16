@@ -46,7 +46,7 @@ function nv_form_result($question_data, $answer_data, $is_admin = 0)
     global $lang_module, $global_config, $module_info, $module_name, $module_data, $module_file, $user_info;
 
     if ($is_admin) {
-        $template = $global_config['module_theme'];
+        $template = 'default';
     } else {
         $template = $module_info['template'];
     }
