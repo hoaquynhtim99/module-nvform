@@ -171,9 +171,11 @@ foreach ($answer_data as $answer) {
 
             if ($question_type == 'table') {
                 $xtpl->parse('main.tr.td.table');
-            } elseif ($question_type == 'file' and file_exists(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $ans)) {
-                $xtpl->assign('FILES', NV_BASE_SITEURL . NV_UPLOADS_DIR . '/' . $module_upload . '/' . $ans);
-                $xtpl->parse('main.tr.td.files');
+            } elseif ($question_type == 'file') {
+                if (!empty($ans) and file_exists(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $ans)) {
+                    $xtpl->assign('FILES', NV_BASE_SITEURL . NV_UPLOADS_DIR . '/' . $module_upload . '/' . $ans);
+                    $xtpl->parse('main.tr.td.files');
+                }
             } else {
                 $xtpl->parse('main.tr.td.other');
             }

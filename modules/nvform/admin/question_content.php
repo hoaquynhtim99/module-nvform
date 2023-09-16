@@ -110,6 +110,7 @@ if ($qid) {
     $question['current_time_0'] = ' checked="checked"';
     $question['editor_mode_0'] = ' checked="checked"';
     $question['class'] = '';
+    $question['question_choices_extend'] = '';
 }
 
 if ($nv_Request->isset_request('submit', 'post')) {

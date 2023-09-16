@@ -89,7 +89,9 @@
                 <td class="success">{ANSWER.answer_edit_time}</td>
                 <!-- BEGIN: td -->
                 <td>
-                    <!-- BEGIN: table --> <a href="#" title="" onclick="modalShow('Chức năng đang hoàn thiện', 'Chức năng đang hoàn thiện'); return false;">{LANG.report_viewtable}</a> <!-- END: table --> <!-- BEGIN: files --> <a href="{FILES}" title="">{LANG.question_options_file_dowload}</a> <!-- END: files --> <!-- BEGIN: other --> {ANSWER} <!-- END: other -->
+                    <!-- BEGIN: table --> <a href="#" title="" onclick="modalShow('Chức năng đang hoàn thiện', 'Chức năng đang hoàn thiện'); return false;">{LANG.report_viewtable}</a> <!-- END: table -->
+                    <!-- BEGIN: files --> <a href="{FILES}" title="">{LANG.question_options_file_dowload}</a> <!-- END: files -->
+                    <!-- BEGIN: other --> {ANSWER} <!-- END: other -->
                 </td>
                 <!-- END: td -->
             </tr>
