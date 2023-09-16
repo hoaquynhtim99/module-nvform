@@ -32,6 +32,9 @@ if ($nv_Request->isset_request('del', 'post')) {
         if (!empty($answer)) {
             $answer = unserialize($answer);
             foreach ($answer as $qid => $ans) {
+                if (!is_numeric($qid)) {
+                    continue;
+                }
                 $question_type = $db->query('SELECT question_type FROM ' . NV_PREFIXLANG . '_' . $module_data . '_question WHERE qid = ' . $qid)->fetchColumn();
                 if ($question_type == 'file' and file_exists(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $ans)) {
                     @nv_deletefile(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $ans);
