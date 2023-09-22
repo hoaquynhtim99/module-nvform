@@ -50,7 +50,7 @@ $sql_create_module[] = "CREATE TABLE " . $db_config['prefix'] . "_" . $lang . "_
   fid mediumint(8) NOT NULL DEFAULT '0',
   answer text,
   answer_extend text,
-  who_answer tinyint(2) NOT NULL DEFAULT '0',
+  who_answer int(11) NOT NULL DEFAULT '0',
   answer_time int(11) NOT NULL DEFAULT '0',
   answer_edit_time int(11) NOT NULL DEFAULT '0',
   answer_ip varchar(45) NOT NULL DEFAULT '' COMMENT 'IP đã trả lời',
