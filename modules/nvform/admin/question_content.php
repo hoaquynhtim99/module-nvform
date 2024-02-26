@@ -256,6 +256,7 @@ if ($nv_Request->isset_request('submit', 'post')) {
         $question['max_length'] = $nv_Request->get_float('nv_max_size', 'post');
         $question['max_length'] = min(nv_converttoBytes(ini_get('upload_max_filesize')), nv_converttoBytes(ini_get('post_max_size')), $question['max_length']);
 
+        $question_file = [];
         $question_file['type'] = $nv_Request->get_typed_array('type', 'post', 'int');
         $question_file['type'] = array_flip($question_file['type']);
         $question_file['type'] = array_intersect_key($myini['types'], $question_file['type']);
@@ -272,6 +273,12 @@ if ($nv_Request->isset_request('submit', 'post')) {
         $question_file['ext'][] = 'inc';
         $question_file['ext'] = array_unique($question_file['ext']);
         $question_file['ext'] = implode(',', $question_file['ext']);
+
+        $question_file['multi_num'] = $nv_Request->get_absint('file_multi_num', 'post', 0);
+        if (empty($question_file['multi_num']) or $question_file['multi_num'] > 20) {
+            $question_file['multi_num'] = 1;
+        }
+        $question_choices = $question_file;
 
         $question['question_choices'] = serialize($question_file);
     } else {
@@ -446,7 +453,7 @@ if (!empty($question_choices)) {
             }
             $xtpl->assign('ROW_NUMFIELD', $number_grid_row);
         }
-    } else {
+    } elseif ($choice_type_text) {
         // Load các lựa chọn cho select, radio,...
         foreach ($question_choices as $key => $value) {
             $xtpl->assign('FIELD_CHOICES', array(
@@ -468,7 +475,6 @@ if (!empty($question_choices)) {
                 $xtpl->assign('FIELD_CHOICES_EXTEND_NUMBER', $number_extend);
             }
             $xtpl->parse('main.loop_field_choice');
-            $xtpl->assign('FIELD_CHOICES_NUMBER', $number);
         }
     }
 }
@@ -524,8 +530,8 @@ $question['checked_required'] = ($question['required']) ? ' checked="checked"' :
 $question['checked_break'] = ($question['break']) ? ' checked="checked"' : '';
 $question['checked_report'] = (!$question['report']) ? ' checked="checked"' : '';
 
-if (!$qid) // Neu sua thi khong cho phep thay doi kieu cau hoi
-{
+if (!$qid) {
+    // Neu sua thi khong cho phep thay doi kieu cau hoi
     foreach ($array_field_type as $key => $value) {
         $xtpl->assign('FIELD_TYPE', array(
             'key' => $key,
@@ -596,6 +602,9 @@ foreach ($myini['exts'] as $key => $name) {
     ));
     $xtpl->parse('main.exts');
 }
+$question_choices['multi_num'] = empty($question_choices['multi_num']) ? 1 : $question_choices['multi_num'];
+
+$xtpl->assign('QUESTION_CHOICES', $question_choices);
 
 if (defined('NV_EDITOR'))
     require_once NV_ROOTDIR . '/' . NV_EDITORSDIR . '/' . NV_EDITOR . '/nv.php';

@@ -183,7 +183,8 @@ $lang_module['question_options_file'] = 'Cấu hình upload';
 $lang_module['question_options_file_max_size'] = 'Dung lượng tối đa';
 $lang_module['question_options_file_allow'] = 'Loại files cho phép';
 $lang_module['question_options_file_ext_ban'] = 'Phần mở rộng bị cấm';
-$lang_module['question_options_file_dowload'] = 'Tải về đính kèm';
+$lang_module['question_options_file_dowload'] = 'Tải đính kèm';
+$lang_module['question_options_file_multi_num'] = 'Số file tối đa được chọn';
 
 $lang_module['question_options_choice'] = 'Các tùy chọn';
 $lang_module['question_choices_empty'] = 'Các giá trị lựa chọn rỗng';

@@ -297,6 +297,13 @@ foreach ($question_info as $row) {
         $row['value'] = str_replace('form_' . $row['qid'] . '/', '', $row['value']);
         $row['question_choices'] = unserialize($row['question_choices']);
         $row['file_type'] = str_replace(',', ', ', $row['question_choices']['type']);
+        $row['multi_num'] = (empty($row['question_choices']['multi_num']) or $row['question_choices']['multi_num'] == 1) ? 1 : $row['question_choices']['multi_num'];
+        $row['multiple'] = ($row['multi_num'] > 1) ? ' multiple' : '';
+        $row['hint_size'] = sprintf($row['multi_num'] > 1 ? $lang_module['field_file_limitsizes'] : $lang_module['field_file_limitsize'], nv_convertfromBytes($row['max_length']));
+        $row['hint_num'] = $row['multi_num'] > 1 ? sprintf($lang_module['field_file_limitnum'], $row['question_choices']['multi_num']) : '';
+        $row['errnum'] = sprintf($lang_module['field_file_limitnum1'], $row['multi_num']);
+        $row['input_multi'] = $row['multi_num'] > 1 ? '[]' : '';
+
         $xtpl->assign('QUESTION', $row);
 
         $xtpl->parse('main.loop.file');

@@ -17,13 +17,15 @@ $question_data = $answer_data = [];
 
 // Xóa câu trả lời
 if ($nv_Request->isset_request('del', 'post')) {
-    if (!defined('NV_IS_AJAX'))
+    if (!defined('NV_IS_AJAX')) {
         die('Wrong URL');
+    }
 
     $aid = $nv_Request->get_int('aid', 'post', 0);
 
-    if (empty($aid))
+    if (empty($aid)) {
         die('NO');
+    }
 
     $answer = $db->query('SELECT answer FROM ' . NV_PREFIXLANG . '_' . $module_data . '_answer WHERE id = ' . $aid)->fetchColumn();
 
@@ -36,8 +38,14 @@ if ($nv_Request->isset_request('del', 'post')) {
                     continue;
                 }
                 $question_type = $db->query('SELECT question_type FROM ' . NV_PREFIXLANG . '_' . $module_data . '_question WHERE qid = ' . $qid)->fetchColumn();
-                if ($question_type == 'file' and file_exists(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $ans)) {
-                    @nv_deletefile(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $ans);
+                if ($question_type != 'file') {
+                    continue;
+                }
+                $ans = explode(',', $ans);
+                foreach ($ans as $ans_i) {
+                    if (!empty($ans_i) and file_exists(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $ans_i)) {
+                        nv_deletefile(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $ans_i);
+                    }
                 }
             }
         }
@@ -175,9 +183,25 @@ foreach ($answer_data as $answer) {
             if ($question_type == 'table') {
                 $xtpl->parse('main.tr.td.table');
             } elseif ($question_type == 'file') {
-                if (!empty($ans) and file_exists(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $ans)) {
-                    $xtpl->assign('FILES', NV_BASE_SITEURL . NV_UPLOADS_DIR . '/' . $module_upload . '/' . $ans);
-                    $xtpl->parse('main.tr.td.files');
+                $file_ans = [];
+                $_ans = explode(',', $ans);
+                foreach ($_ans as $an_i) {
+                    if (!empty($an_i) and file_exists(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $an_i)) {
+                        $file_ans[] = NV_BASE_SITEURL . NV_UPLOADS_DIR . '/' . $module_upload . '/' . $an_i;
+                    }
+                }
+                if (!empty($file_ans)) {
+                    if (sizeof($file_ans) == 1) {
+                        $xtpl->assign('FILES', $file_ans[0]);
+                        $xtpl->parse('main.tr.td.files');
+                    } else {
+                        $stt = 1;
+                        foreach ($file_ans as $an_i) {
+                            $xtpl->assign('STT_FILES', $stt++);
+                            $xtpl->assign('FILES', $an_i);
+                            $xtpl->parse('main.tr.td.loopfiles');
+                        }
+                    }
                 }
             } else {
                 $xtpl->parse('main.tr.td.other');

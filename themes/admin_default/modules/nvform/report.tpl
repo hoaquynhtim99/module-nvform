@@ -90,7 +90,12 @@
                 <!-- BEGIN: td -->
                 <td>
                     <!-- BEGIN: table --> <a href="#" title="" onclick="modalShow('Chức năng đang hoàn thiện', 'Chức năng đang hoàn thiện'); return false;">{LANG.report_viewtable}</a> <!-- END: table -->
-                    <!-- BEGIN: files --> <a href="{FILES}" title="">{LANG.question_options_file_dowload}</a> <!-- END: files -->
+                    <!-- BEGIN: files --> <a href="{FILES}" title="{LANG.question_options_file_dowload}" target="_blank">{LANG.question_options_file_dowload}</a> <!-- END: files -->
+                    <!-- BEGIN: loopfiles -->
+                    <div>
+                        - <a href="{FILES}" title="{LANG.question_options_file_dowload} {STT_FILES}" target="_blank">{LANG.question_options_file_dowload} {STT_FILES}</a>
+                    </div>
+                    <!-- END: loopfiles -->
                     <!-- BEGIN: other --> {ANSWER} <!-- END: other -->
                 </td>
                 <!-- END: td -->

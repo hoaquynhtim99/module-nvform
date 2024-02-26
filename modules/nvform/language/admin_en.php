@@ -184,6 +184,7 @@ $lang_module['question_options_file_max_size'] = 'Maximum capacity';
 $lang_module['question_options_file_allow'] = 'Types of files allowed';
 $lang_module['question_options_file_ext_ban'] = 'Extensions are prohibited';
 $lang_module['question_options_file_dowload'] = 'Download attachment';
+$lang_module['question_options_file_multi_num'] = 'Maximum number of files allowed to pick';
 
 $lang_module['question_options_choice'] = 'Options';
 $lang_module['question_choices_empty'] = 'Empty choice values';

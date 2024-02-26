@@ -6,6 +6,10 @@
  * @Createdate Tue, 08 Apr 2014 15:13:43 GMT
  */
 
+.mb-0 {
+    margin-bottom: 0!important;
+}
+
 .list_box {
     height: 200px;
     overflow: scroll;

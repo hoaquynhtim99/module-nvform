@@ -7,12 +7,39 @@
  */
 
 $(document).ready(function() {
-    $('#upload_fileupload').change(function(){
-         $('#file_name').val($(this).val().match(/[-_\w]+[.][\w]+$/i)[0]);
+    $('[data-click="nvform-picked-file"]').on('change', function() {
+        var ipt = $(this);
+        var iptFile = document.getElementById(ipt.attr('id'));
+        var fileNames = [];
+        if (iptFile.files && iptFile.files.length > 0) {
+            if (iptFile.files.length > ipt.data('num')) {
+                alert(ipt.data('errnum'));
+                $(ipt.data('iptvalue')).val('');
+                iptFile.value = '';
+                return;
+            }
+
+            for (var i = 0; i < iptFile.files.length; i++) {
+                if (iptFile.files[i].size > ipt.data('max')) {
+                    alert(ipt.data('errsize'));
+                    $(ipt.data('iptvalue')).val('');
+                    iptFile.value = '';
+                    return;
+                }
+                fileNames.push(iptFile.files[i].name);
+            }
+        } else {
+            var m = ipt.val().match(/[-_\w]+[.][\w]+$/i);
+            if (!!m) {
+                fileNames.push(m[0]);
+            }
+        }
+        $(ipt.data('iptvalue')).val(fileNames.join(', '));
     });
 
-    $('#upload_fileimage').change(function(){
-         $('#photo_name').val($(this).val().match(/[-_\w]+[.][\w]+$/i)[0]);
+    // Chọn ảnh upload
+    $('[data-click="nvform-pick-file"]').on('click', function() {
+        $($(this).data('target')).trigger('click');
     });
 });
 

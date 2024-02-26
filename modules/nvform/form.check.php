@@ -23,50 +23,95 @@ foreach ($question_info as $row_f) {
     }
 
     if ($row_f['question_type'] == 'file') {
-        $input_file = $_FILES['question_file_' . $row_f['qid']];
-        if (isset($input_file) and is_uploaded_file($input_file['tmp_name'])) {
-            $folder = 'form_' . $row_f['fid'];
-            $question_choices = unserialize($row_f['question_choices']);
-            if (!empty($question_choices)) {
-                if (!file_exists(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $folder)) {
-                    nv_mkdir(NV_UPLOADS_REAL_DIR . '/' . $module_upload, $folder);
-                }
-                $upload = new NvUpload(explode(',', $question_choices['type']), $question_choices['ext'], $global_config['forbid_mimes'], $row_f['max_length'], NV_MAX_WIDTH, NV_MAX_HEIGHT);
-                $upload->setLanguage($lang_global);
-                $upload_info = $upload->save_file($input_file, NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $folder, false);
+        $question_choices = unserialize($row_f['question_choices']);
+        if (!is_array($question_choices) or !isset($question_choices['type'], $question_choices['ext'])) {
+            $answer_info[$row_f['qid']] = $old_value;
+            continue;
+        }
+        // Dữ liệu trước đây không có multi_num nên thêm vào = 1
+        if (!isset($question_choices['multi_num'])) {
+            $question_choices['multi_num'] = 1;
+        }
 
-                @unlink($input_file['tmp_name']);
-
-                if (empty($upload_info['error'])) {
-                    mt_srand((double) microtime() * 1000000);
-                    $maxran = 1000000;
-                    $random_num = mt_rand(0, $maxran);
-                    $random_num = md5($random_num);
-                    $nv_pathinfo_filename = nv_pathinfo_filename($upload_info['name']);
-                    $new_name = NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $folder . '/' . $nv_pathinfo_filename . '.' . $random_num . '.' . $upload_info['ext'];
-
-                    $rename = nv_renamefile($upload_info['name'], $new_name);
-
-                    if ($rename[0] == 1) {
-                        $value = $new_name;
-                    } else {
-                        $value = $upload_info['name'];
+        $input_files = [];
+        if ($question_choices['multi_num'] > 1) {
+            if (!empty($_FILES['question_file_' . $row_f['qid']]) and !empty($_FILES['question_file_' . $row_f['qid']]['tmp_name']) and is_array($_FILES['question_file_' . $row_f['qid']]['tmp_name'])) {
+                foreach ($_FILES['question_file_' . $row_f['qid']]['tmp_name'] as $_key => $_tmp_name) {
+                    if (is_uploaded_file($_tmp_name) and !empty($_FILES['question_file_' . $row_f['qid']]['name'][$_key]) and !empty($_FILES['question_file_' . $row_f['qid']]['size'][$_key])) {
+                        $input_files[] = [
+                            'name' => $_FILES['question_file_' . $row_f['qid']]['name'][$_key],
+                            'full_path' => isset($_FILES['question_file_' . $row_f['qid']]['full_path'][$_key]) ? $_FILES['question_file_' . $row_f['qid']]['full_path'][$_key] : '',
+                            'type' => isset($_FILES['question_file_' . $row_f['qid']]['type'][$_key]) ? $_FILES['question_file_' . $row_f['qid']]['type'][$_key] : '',
+                            'tmp_name' => $_tmp_name,
+                            'error' => isset($_FILES['question_file_' . $row_f['qid']]['error'][$_key]) ? $_FILES['question_file_' . $row_f['qid']]['error'][$_key] : 0,
+                            'size' => $_FILES['question_file_' . $row_f['qid']]['size'][$_key],
+                        ];
                     }
-
-                    @chmod($value, 0644);
-                    $value = str_replace(NV_ROOTDIR . '/' . NV_UPLOADS_DIR . '/' . $module_upload . '/', '', $value);
-
-                    // Xoa file cu (neu co)
-                    if (!empty($old_value) and file_exists(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $old_value)) {
-                        @nv_deletefile(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $old_value);
-                    }
-                } else {
-                    $error = $upload_info['error'];
                 }
             }
-        } else {
-            $value = $old_value;
+        } elseif (!empty($_FILES['question_file_' . $row_f['qid']]) and is_uploaded_file($_FILES['question_file_' . $row_f['qid']]['tmp_name'])) {
+            $input_files = [$_FILES['question_file_' . $row_f['qid']]];
         }
+        if (empty($input_files)) {
+            $answer_info[$row_f['qid']] = $old_value;
+            continue;
+        }
+
+        $folder = 'form_' . $row_f['fid'];
+        if (!file_exists(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $folder)) {
+            nv_mkdir(NV_UPLOADS_REAL_DIR . '/' . $module_upload, $folder);
+        }
+
+        // Bắt lỗi từng file, ít nhất 1 file upload được thì lấy
+        $_values = [];
+        $_error = '';
+
+        foreach ($input_files as $input_file) {
+            $upload = new NvUpload(explode(',', $question_choices['type']), $question_choices['ext'], $global_config['forbid_mimes'], $row_f['max_length'], NV_MAX_WIDTH, NV_MAX_HEIGHT);
+            $upload->setLanguage($lang_global);
+            $upload_info = $upload->save_file($input_file, NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $folder, false);
+
+            @unlink($input_file['tmp_name']);
+
+            if (empty($upload_info['error'])) {
+                mt_srand((double) microtime() * 1000000);
+                $maxran = 1000000;
+                $random_num = mt_rand(0, $maxran);
+                $random_num = md5($random_num);
+                $nv_pathinfo_filename = nv_pathinfo_filename($upload_info['name']);
+                $new_name = NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $folder . '/' . $nv_pathinfo_filename . '.' . $random_num . '.' . $upload_info['ext'];
+
+                $rename = nv_renamefile($upload_info['name'], $new_name);
+
+                if ($rename[0] == 1) {
+                    $_value = $new_name;
+                } else {
+                    $_value = $upload_info['name'];
+                }
+
+                @chmod($_value, 0644);
+                $_value = str_replace(NV_ROOTDIR . '/' . NV_UPLOADS_DIR . '/' . $module_upload . '/', '', $_value);
+                $_values[] = $_value;
+            } else {
+                $_error = $upload_info['error'];
+            }
+        }
+        $value = empty($_values) ? $old_value : implode(',', $_values);
+        if (empty($_values) and $_error) {
+            $error = $_error;
+        } else {
+            // Upload thành công thì xóa file cũ nếu có
+            // Chỗ này chưa tối ưu khi các input khác có lỗi thì lại xóa mất file cũ cần tối ưu thêm
+            if (!empty($old_value)) {
+                $old_values = explode(',', $old_value);
+                foreach ($old_values as $_old_value) {
+                    if (file_exists(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $_old_value)) {
+                        nv_deletefile(NV_UPLOADS_REAL_DIR . '/' . $module_upload . '/' . $_old_value);
+                    }
+                }
+            }
+        }
+
         $lang_module['field_match_type_required'] = $lang_module['field_file_required'];
     }
 

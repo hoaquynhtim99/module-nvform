@@ -167,6 +167,12 @@ function nv_form_result($question_data, $answer_data, $is_admin = 0)
 
                     $xtpl->parse('main.question.answer.grid');
                 } else {
+                    if ($data['question_type'] == 'file') {
+                        $xtpl->parse('main.question.answer.other.file');
+                    } else {
+                        $xtpl->parse('main.question.answer.other.text');
+                    }
+
                     $xtpl->parse('main.question.answer.other');
                 }
 

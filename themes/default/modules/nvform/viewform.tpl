@@ -158,13 +158,15 @@
 
                 <!-- BEGIN: file -->
                 <div class="input-group">
-                    <input type="text" class="form-control" id="photo_name" value="{QUESTION.value}" disabled> <span class="input-group-btn">
-                        <button class="btn btn-default" onclick="$('#upload_fileimage').click();" type="button">
+                    <input type="text" class="form-control" id="photo_name_{QUESTION.qid}" value="{QUESTION.value}" disabled>
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" data-click="nvform-pick-file" data-target="#upload_fileimage_{QUESTION.qid}" type="button">
                             <em class="fa fa-folder-open-o fa-fix">&nbsp;</em> {LANG.file_selectfile}
                         </button>
                     </span>
                 </div>
-                <em class="help-block"><strong>{LANG.field_upload_ext_note}:</strong> {QUESTION.file_type}</em> <input type="file" name="question_file_{QUESTION.qid}" id="upload_fileimage" style="visibility: hidden;" />
+                <i class="help-block mb-0"><strong>{LANG.field_upload_ext_note}:</strong> {QUESTION.file_type}. {QUESTION.hint_size}{QUESTION.hint_num}.</i>
+                <input type="file" name="question_file_{QUESTION.qid}{QUESTION.input_multi}" data-click="nvform-picked-file" id="upload_fileimage_{QUESTION.qid}" data-iptvalue="#photo_name_{QUESTION.qid}" data-max="{QUESTION.max_length}" data-num="{QUESTION.multi_num}" data-errsize="{QUESTION.hint_size}" data-errnum="{QUESTION.errnum}" style="width: 1px; height: 1px; visibility: hidden;" {QUESTION.multiple}>
                 <!-- END: file -->
 
             </div>
