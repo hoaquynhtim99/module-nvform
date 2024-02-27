@@ -128,7 +128,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="form-group">
                         <label class="col-sm-4 control-label"><strong>{LANG.form_export_handler}</strong> <i class="fa fa-info-circle text-info" title="{LANG.form_export_handler1}" data-toggle="rps-c-tip" role="button"></i></label>
                         <div class="col-sm-20">
                             <div class="form-inline">
@@ -138,6 +138,14 @@
                                     <option value="{EXPORT_HANDLER.key}"{EXPORT_HANDLER.selected}>{EXPORT_HANDLER.title}</option>
                                     <!-- END: export_handler -->
                                 </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-4 control-label"><strong>{LANG.form_sendmail}</strong></label>
+                        <div class="col-sm-20">
+                            <div class="checkbox">
+                                <label><input type="checkbox" value="1" name="sendmail"{DATA.sendmail}> {LANG.form_sendmail_note}</label>
                             </div>
                         </div>
                     </div>

@@ -213,7 +213,7 @@ if ($nv_Request->isset_request('submit', 'post')) {
                 $nv_Request->set_Session($module_data . '_answer', $crypt->encrypt(json_encode($session_data)));
             }
 
-            // Báo cáo kết qủa qua email
+            // Báo cáo kết quả qua email của nhóm nhận thống kê
             if (($form_info['form_report_type'] == 1) and !$filled) {
                 $form_report_type_email = unserialize($form_info['form_report_type_email']);
                 $subject = $lang_module['reply'] . ': ' . $form_info['title'];
@@ -243,8 +243,15 @@ if ($nv_Request->isset_request('submit', 'post')) {
                     $message = $xtpl->text('main');
                     $message = nv_site_theme($message, false);
 
-                    nv_sendmail($global_config['site_email'], $listmail, $subject, $message);
+                    nv_sendmail([$global_config['site_name'], $global_config['site_email']], $listmail, $subject, $message);
                 }
+            }
+
+            // Báo cáo qua người dùng
+            if (!$filled and defined('NV_IS_USER') and !empty($form_info['sendmail'])) {
+                $subject = sprintf($lang_module['report_mail_subject'], $global_config['site_name']);
+                $message = sprintf($lang_module['report_mail_body'], $user_info['full_name'], $user_info['username'], nv_date('H:i:s d/m/Y', NV_CURRENTTIME), (NV_MY_DOMAIN . nv_url_rewrite($form_info['link'], true)), $form_info['title']);
+                nv_sendmail([$global_config['site_name'], $global_config['site_email']], $user_info['email'], $subject, $message);
             }
 
             if ($form_info['question_report']) {

@@ -58,6 +58,8 @@ $lang_module['form_report_type_email'] = 'Chỉ Email';
 $lang_module['form_report_type_email_groups'] = 'Chọn nhóm thành viên nhận báo cáo';
 $lang_module['form_report_type_email_maillist'] = 'hoặc nhập sách sách email nhận báo cáo (Cách nhau bởi dấu chấm phẩy)';
 $lang_module['form_report_type_email_maillist_note'] = 'Nhập danh sách email nhận thông báo';
+$lang_module['form_sendmail'] = 'Thông báo qua email';
+$lang_module['form_sendmail_note'] = 'Gửi đến người dùng một email thông báo khi trả lời biểu mẫu lần đầu. Chỉ áp dụng nếu thành viên đã đăng nhập tài khoản trước khi trả lời biểu mẫu';
 
 $lang_module['form_template'] = 'Giao diện biểu mẫu';
 $lang_module['form_template_background'] = 'Nền trang';

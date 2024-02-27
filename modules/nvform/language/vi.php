@@ -39,6 +39,13 @@ $lang_module['export'] = 'Xuất kết quả';
 $lang_module['report_who_answer'] = 'Người trả lời';
 $lang_module['report_answer_time'] = 'Thời gian trả lời';
 $lang_module['report_answer_edit_time'] = 'Cập nhật lần cuối';
+$lang_module['report_mail_subject'] = 'Thông báo gửi biểu mẫu thành công trên website %1$s';
+$lang_module['report_mail_body'] = 'Chào %1$s (tên đăng nhập %2$s). <br /><br />
+Vào lúc %3$s, bạn đã hoàn tất biểu mẫu <a href="%4$s">%5$s</a> trên website %1$s<br />
+Để xem lại thông tin đã điền bạn có thể truy cập theo địa chỉ sau:<br />
+<a href="%4$s">%4$s</a><br /><br />
+Đây là thông báo bắt buộc đến email vì thao tác của bạn trên website. Bạn vui lòng không trả lời mail này.<br />
+Trân trọng cảm ơn!';
 
 $lang_module['error_form_not_found_detail'] = 'Hệ thống không tìm thấy biểu mẫu nào theo như yêu cầu của bạn.<br />Vui lòng liên hệ với quản trị để biết thêm thông tin.';
 $lang_module['error_form_not_premission_detail'] = 'Bạn không được phép truy cập biểu mẫu này.<br />Vui lòng liên hệ quản trị để biết thêm chi tiết.';

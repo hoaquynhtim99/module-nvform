@@ -39,6 +39,13 @@ $lang_module['export'] = 'Export results';
 $lang_module['report_who_answer'] = 'Who answered';
 $lang_module['report_answer_time'] = 'Reply time';
 $lang_module['report_answer_edit_time'] = 'Last updated';
+$lang_module['report_mail_subject'] = 'Notice of successful form submission on website %1$s';
+$lang_module['report_mail_body'] = 'Dear %1$s (username %2$s). <br /><br />
+At %3$s, you have completed the form <a href="%4$s">%5$s</a> on website %1$s<br />
+To review the information you have filled in, you can access the following address:<br />
+<a href="%4$s">%4$s</a><br /><br />
+This is a mandatory email notification for your actions on the website. Please do not reply to this email.<br />
+Thank you!';
 
 $lang_module['error_form_not_found_detail'] = 'The system did not find any form according to your request.<br />Please contact the administrator for more information.';
 $lang_module['error_form_not_premission_detail'] = 'You are not authorized to access this form.<br />Please contact admin for more details.';

@@ -40,6 +40,7 @@ $sql_create_module[] = "CREATE TABLE " . $db_config['prefix'] . "_" . $lang . "_
   add_time int(11) NOT NULL DEFAULT '0',
   status tinyint(1) unsigned NOT NULL DEFAULT '0',
   export_handler varchar(100) NOT NULL DEFAULT '' COMMENT 'Trình xử lý xuất kết quả ngoài site',
+  sendmail tinyint(1) NOT NULL DEFAULT '0' COMMENT '1 thì gửi email cho user sau khi trả lời biểu mẫu',
   PRIMARY KEY (id),
   UNIQUE KEY alias (alias)
 ) ENGINE=MyISAM";

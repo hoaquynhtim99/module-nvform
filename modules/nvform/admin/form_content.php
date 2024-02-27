@@ -48,7 +48,8 @@ $form_data = [
         'background_imgage_position' => ''
     ],
     'status' => 1,
-    'export_handler' => ''
+    'export_handler' => '',
+    'sendmail' => 0
 ];
 
 if ($id > 0) {
@@ -141,6 +142,7 @@ if ($nv_Request->get_int('save', 'post') == '1') {
     if (!in_array($form_data['export_handler'] . '.php', $array_exporter) or $form_data['export_handler'] == 'default') {
         $form_data['export_handler'] = '';
     }
+    $form_data['sendmail'] = (int) $nv_Request->get_bool('sendmail', 'post', false);
 
     if (empty($error)) {
         $form_data['template'] = serialize($form_data['template']);
@@ -156,7 +158,8 @@ if ($nv_Request->get_int('save', 'post') == '1') {
                 end_time = :end_time, groups_view = :groups_view, user_editable = :user_editable,
                 question_display = :question_display, question_report = :question_report,
                 form_report_type = :form_report_type, form_report_type_email = :form_report_type_email,
-                template = :template, export_handler=:export_handler, status=' . $form_data['status'] . '
+                template = :template, export_handler=:export_handler, status=' . $form_data['status'] . ',
+                sendmail=:sendmail
             WHERE id =' . $id;
         } else {
             $weight = $db->query("SELECT MAX(weight) FROM " . NV_PREFIXLANG . "_" . $module_data)->fetchColumn();
@@ -165,11 +168,12 @@ if ($nv_Request->get_int('save', 'post') == '1') {
             $sql = 'INSERT INTO ' . NV_PREFIXLANG . '_' . $module_data . ' (
                 title, alias, description, description_html, image, start_time,
                 end_time, groups_view, user_editable, question_display, question_report,
-                form_report_type, form_report_type_email, template, weight, add_time, status, export_handler
+                form_report_type, form_report_type_email, template, weight, add_time, status, export_handler, sendmail
             ) VALUES (
                 :title, :alias, :description, :description_html, :image, :start_time,
                 :end_time, :groups_view, :user_editable, :question_display, :question_report,
-                :form_report_type, :form_report_type_email, :template, ' . $weight . ', ' . NV_CURRENTTIME . ', 1, :export_handler
+                :form_report_type, :form_report_type_email, :template, ' . $weight . ', ' . NV_CURRENTTIME . ', 1, :export_handler,
+                :sendmail
             )';
         }
 
@@ -189,6 +193,7 @@ if ($nv_Request->get_int('save', 'post') == '1') {
         $query->bindParam(':form_report_type_email', $form_data['form_report_type_email'], PDO::PARAM_STR);
         $query->bindParam(':template', $form_data['template'], PDO::PARAM_STR);
         $query->bindParam(':export_handler', $form_data['export_handler'], PDO::PARAM_STR);
+        $query->bindParam(':sendmail', $form_data['sendmail'], PDO::PARAM_INT);
 
         if ($query->execute()) {
             if ($id) {
@@ -209,6 +214,7 @@ if ($nv_Request->get_int('save', 'post') == '1') {
 $form_data['template']['background_image'] = !empty($form_data['template']['background_image']) ? NV_BASE_SITEURL . NV_UPLOADS_DIR . '/' . $module_upload . '/' . $form_data['template']['background_image'] : '';
 $form_data['question_report_check'] = $form_data['question_report'] ? 'checked="checked"' : '';
 $form_data['user_editable_check'] = $form_data['user_editable'] ? 'checked="checked"' : '';
+$form_data['sendmail'] = !empty($form_data['sendmail']) ? ' checked="checked"' : '';
 
 $form_report_type_email = $form_data['form_report_type_email'];
 $form_data['form_report_type_email'] = $form_report_type_email['form_report_type_email'];

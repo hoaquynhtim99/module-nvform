@@ -58,6 +58,8 @@ $lang_module['form_report_type_email'] = 'Email Only';
 $lang_module['form_report_type_email_groups'] = 'Select member groups to receive reports';
 $lang_module['form_report_type_email_maillist'] = 'or enter report email list (Separated by semicolon)';
 $lang_module['form_report_type_email_maillist_note'] = 'Enter email list to receive notifications';
+$lang_module['form_sendmail'] = 'Notification via email';
+$lang_module['form_sendmail_note'] = 'Send users a notification email when they respond to the form for the first time. Only applies if the member has logged into their account before answering the form';
 
 $lang_module['form_template'] = 'Form theme';
 $lang_module['form_template_background'] = 'Page background';
