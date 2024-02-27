@@ -19,8 +19,8 @@ $module_version = [
     'submenu' => 'main',
     'is_sysmod' => 0,
     'virtual' => 1,
-    'version' => '4.3.02',
-    'date' => 'Friday, September 11, 2020 19:21:55 GMT+07:00',
+    'version' => '4.5.01',
+    'date' => 'Tuesday, February 27, 2024 1:32:59 PM GMT+07:00',
     'author' => 'hongoctrien <hongoctrien@2mit.org>',
     'uploads_dir' => [
         $module_name
