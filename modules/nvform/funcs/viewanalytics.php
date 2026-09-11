@@ -46,7 +46,9 @@ $question_info = $db->query("SELECT * FROM " . NV_PREFIXLANG . '_' . $module_dat
 // Thong tin cau tra loi
 $answer_info = array();
 $result = $db->query("SELECT answer FROM " . NV_PREFIXLANG . '_' . $module_data . "_answer WHERE fid = " . $fid);
-while (list ($answer) = $result->fetch(3)) {
+while ($_scratch = $result->fetch(3)) {
+    list($answer) = $_scratch;
+    unset($_scratch);
     if (!empty($answer)) {
         $answer_info[] = unserialize($answer);
     }

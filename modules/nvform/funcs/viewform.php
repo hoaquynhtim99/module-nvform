@@ -222,7 +222,9 @@ if ($nv_Request->isset_request('submit', 'post')) {
                 // Lấy danh sách email
                 if ($form_report_type_email['form_report_type_email'] == 0 and !empty($form_report_type_email['group_email'])) {
                     $result = $db->query('SELECT userid FROM ' . NV_GROUPS_GLOBALTABLE . '_users WHERE group_id IN (' . implode(',', $form_report_type_email['group_email']) . ')');
-                    while (list ($userid) = $result->fetch(3)) {
+                    while ($_scratch = $result->fetch(3)) {
+                        list($userid) = $_scratch;
+                        unset($_scratch);
                         $listmail[] = $db->query('SELECT email FROM ' . NV_USERS_GLOBALTABLE . ' WHERE userid=' . $userid)->fetchColumn();
                     }
                 } elseif ($form_report_type_email['form_report_type_email'] == 1 and !empty($form_report_type_email['listmail'])) {

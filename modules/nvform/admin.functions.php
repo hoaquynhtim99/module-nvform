@@ -67,12 +67,16 @@ function nv_update_answer($form_id)
 
     $array_qid = $array_qid_old = array();
     $result = $db->query('SELECT qid FROM ' . NV_PREFIXLANG . '_' . $module_data . '_question WHERE fid=' . $form_id . ' ORDER BY weight');
-    while (list ($qid) = $result->fetch(3)) {
+    while ($_scratch = $result->fetch(3)) {
+        list($qid) = $_scratch;
+        unset($_scratch);
         $array_qid[] = $qid;
     }
 
     $result = $db->query('SELECT id, answer FROM ' . NV_PREFIXLANG . '_' . $module_data . '_answer WHERE fid=' . $form_id);
-    while (list ($id, $row_answer) = $result->fetch(3)) {
+    while ($_scratch = $result->fetch(3)) {
+        list($id, $row_answer) = $_scratch;
+        unset($_scratch);
         $row_answer = unserialize($row_answer);
         $array_qid_old = array_keys($row_answer);
         sort($array_qid);
